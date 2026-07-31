@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自习室意见反馈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            background-color: #f0f7ff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .feedback-card {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(20, 80, 180, 0.12);
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            color: #0f4c92;
+            margin-bottom: 28px;
+            font-weight: 600;
+        }
+        .form-item {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #d0e0f5;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: 0.3s all ease;
+            outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: #2374d9;
+            box-shadow: 0 0 0 3px rgba(35, 116, 217, 0.15);
+        }
+        textarea {
+            min-height: 130px;
+            resize: none;
+        }
+        #submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1f6ed8, #0d50b3);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #submit-btn:hover {
+            background: linear-gradient(135deg, #1860c2, #0a4091);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(15, 76, 146, 0.25);
+        }
+        #submit-btn:active {
+            transform: translateY(0);
+        }
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .tip-text {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #777;
+            text-align: center;
+        }
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #52c41a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast">提交成功！感谢您的反馈</div>
+    
+    <div class="feedback-card">
+        <h2 class="title">自习室意见反馈</h2>
+        <div class="form-item">
+            <label>您的姓名 <span style="color: #ff4d4f;">*</span></label>
+            <input id="username" placeholder="请输入姓名">
+        </div>
+        <div class="form-item">
+            <label>联系电话</label>
+            <input id="phone" placeholder="选填，方便联系您">
+        </div>
+        <div class="form-item">
+            <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
+            <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
+        </div>
+        <button id="submit-btn" onclick="submitData()">提交反馈</button>
+        <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
+    </div>
+
+    <script>
+        // 线上部署无需修改这个地址
+        const API_PATH = "/api/submit";
+
+        function submitData() {
+            const name = document.getElementById("username").value.trim();
+            const tel = document.getElementById("phone").value.trim();
+            const msg = document.getElementById("content").value.trim();
+            const btn = document.getElementById("submit-btn");
+
+            if (!name) {
+                alert("请填写姓名！");
+                return;
+            }
+            if (!msg) {
+                alert("请填写反馈内容！");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "提交中...";
+
+            fetch(API_PATH, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    phone: tel,
+                    content: msg
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast();
+                    document.getElementById("username").value = "";
+                    document.getElementById("phone").value = "";
+                    document.getElementById("content").value = "";
+                } else {
+                    alert("提交失败：" + (data.msg || "请稍后重试"));
+                }
+            })
+            .catch(err => {
+                alert("网络异常，请稍后重试");
+                console.error(err);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = "提交反馈";
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+    </script>
+</body>
+</html>
