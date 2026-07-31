@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   try {
     const { token } = JSON.parse(event.body || "{}");
     // 在此填入你的Turnstile Secret Key
-    const SECRET_KEY = "在此粘贴你的SecretKey";
+    const SECRET_KEY = "0x4AAAAAAEC6miU5NB6sZ11rLz6koXDZXwI";
 
     const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
