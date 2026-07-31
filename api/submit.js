@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({msg:"仅支持POST"});
   }
-  const SUPABASE_URL = "https://prcumhtnofzmnyhcavez.supabase.co";
+ 
   const SUPABASE_KEY = "sb_publishable_yoLE7CK9nOuQYdIv8R_vng_43ba_Ffu";
 
   const {name, phone, content} = req.body;
