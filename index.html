@@ -68,6 +68,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            margin-top:12px;
         }
         #submit-btn:hover {
             background: linear-gradient(135deg, #1860c2, #0a4091);
@@ -107,6 +108,7 @@
             opacity: 1;
         }
     </style>
+    <!-- 极验四代SDK -->
     <script src="https://static.geetest.com/v4/gt4.js"></script>
 </head>
 <body>
@@ -116,7 +118,7 @@
         <h2 class="title">自习室意见反馈</h2>
         <div class="form-item">
             <label>您的姓名 <span style="color: #ff4d4f;">*</span></label>
-            <input id="username" placeholder="请输入姓名，建议填写昵称！">
+            <input id="username" placeholder="请输入姓名">
         </div>
         <div class="form-item">
             <label>联系电话</label>
@@ -126,14 +128,42 @@
             <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
             <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
         </div>
+        <!-- 极验容器 -->
         <div id="geetest-container"></div>
-        <button id="submit-btn" onclick="submitData()">提交反馈</button>
+        <!-- 移除原生onclick -->
+        <button id="submit-btn">提交反馈</button>
         <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
     </div>
 
     <script>
-        // ==========已经修改为Netlify地址==========
+        // ================= 配置区 请替换为你极验后台的captcha_id =================
+        const GT_CAPTCHA_ID = "24413e26eea0851c62e9237828731c4b";
         const API_PATH = "/.netlify/functions/submit";
+
+        // 保存极验验证票据
+        let geetestTicket = null;
+        let gtInstance = null;
+
+        // 初始化极验4代
+        initGeetest4({
+            captchaId: GT_CAPTCHA_ID,
+            product: "float", // float浮动弹窗，可选bind嵌入模式
+            riskType: "slide",
+            onSuccess: function (result) {
+                // 验证成功，保存票据传给后端
+                geetestTicket = result;
+                console.log("验证成功票据：", geetestTicket);
+            },
+            onError: function(err) {
+                console.error("验证加载异常", err);
+            }
+        }, function (gt) {
+            gtInstance = gt;
+        });
+
+        // 提交按钮监听
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.addEventListener("click", submitData);
 
         function submitData() {
             const name = document.getElementById("username").value.trim();
@@ -149,6 +179,13 @@
                 alert("请填写反馈内容！");
                 return;
             }
+            // 判断是否完成人机验证
+            if (!geetestTicket) {
+                alert("请先完成人机验证！");
+                // 唤起验证弹窗
+                gtInstance.showCaptcha();
+                return;
+            }
 
             btn.disabled = true;
             btn.textContent = "提交中...";
@@ -161,18 +198,29 @@
                 body: JSON.stringify({
                     name: name,
                     phone: tel,
-                    content: msg
+                    content: msg,
+                    // 传递极验全套票据给后端校验
+                    lot_number: geetestTicket.lot_number,
+                    pass_token: geetestTicket.pass_token,
+                    gen_time: geetestTicket.gen_time
                 })
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     showToast();
+                    // 清空表单
                     document.getElementById("username").value = "";
                     document.getElementById("phone").value = "";
                     document.getElementById("content").value = "";
+                    // 重置验证码状态，防止重复提交
+                    geetestTicket = null;
+                    gtInstance.reset();
                 } else {
                     alert("提交失败：" + (data.msg || "请稍后重试"));
+                    // 验证失败，重置验证码
+                    geetestTicket = null;
+                    gtInstance.reset();
                 }
             })
             .catch(err => {
