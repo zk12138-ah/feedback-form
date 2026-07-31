@@ -1,36 +1,21 @@
-export default async function handler(req, res) {
-  // 处理跨域 OPTIONS
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    return res.status(204).end();
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, msg: "请求方式错误" });
-  }
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const TURNSTILE_SECRET = env.TURNSTILE_SECRET;
 
   try {
-    const { token } = req.body;
-    // ⚠️填入你的Cloudflare Turnstile Secret Key
-    const SECRET_KEY = "0x4AAAAAAEC6miU5NB6sZ11rLz6koXDZXwI";
+    const { token } = await request.json();
+    const formData = new FormData();
+    formData.append("secret", TURNSTILE_SECRET);
+    formData.append("response", token);
 
-    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        secret: SECRET_KEY,
-        response: token
-      })
+      body: formData
     });
 
-    const result = await response.json();
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    return res.status(200).json(result);
+    const data = await res.json();
+    return Response.json(data);
   } catch (err) {
-    return res.status(500).json({ success: false, msg: "服务器验证异常" });
+    return Response.json({ success: false, error: err.message }, { status: 500 });
   }
 }
