@@ -145,21 +145,25 @@
         let gtInstance = null;
 
         // 初始化极验4代
-        initGeetest4({
-            captchaId: GT_CAPTCHA_ID,
-            product: "float", // float浮动弹窗，可选bind嵌入模式
-            riskType: "slide",
-            onSuccess: function (result) {
-                // 验证成功，保存票据传给后端
-                geetestTicket = result;
-                console.log("验证成功票据：", geetestTicket);
-            },
-            onError: function(err) {
-                console.error("验证加载异常", err);
-            }
-        }, function (gt) {
-            gtInstance = gt;
-        });
+        // 初始化极验4代【bind嵌入模式，页面直接显示滑块】
+initGeetest4({
+    captchaId: GT_CAPTCHA_ID,
+    product: "bind",       // 嵌入模式，在容器内直接展示验证码
+    riskType: "slide",
+    onSuccess: function (result) {
+        // 用户拖动滑块验证成功，获取校验票据
+        geetestTicket = result;
+        console.log("验证票据", result);
+    },
+    onError: function(err) {
+        console.error("验证码加载失败", err);
+    },
+    onClose: function() {
+        console.log("验证码弹窗关闭");
+    }
+}, function (gt) {
+    gtInstance = gt;
+});
 
         // 提交按钮监听
         const submitBtn = document.getElementById("submit-btn");
