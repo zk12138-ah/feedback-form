@@ -8,7 +8,8 @@ exports.handler = async function(event, context) {
     }
   }
 
-  const SUPABASE_URL = "https://prcumhtnofzmnyhcavez.supabase.co";
+  const SUPABASE_URL = process.env.SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
   const SUPABASE_KEY = "sb_publishable_yoLE7CK9nOuQYdIv8R_vng_43ba_Ffu";
 
   try{
