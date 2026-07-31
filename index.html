@@ -107,13 +107,13 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
-        /* 验证码容器间距 */
-        #geetest-container {
+        /* Turnstile验证码间距 */
+        #cf-turnstile-wrap {
             margin:12px 0;
         }
     </style>
-    <!-- 极验四代SDK -->
-    <script src="https://static.geetest.com/v4/gt4.js"></script>
+    <!-- 移除极验SDK，引入Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/site.js" defer></script>
 </head>
 <body>
     <div class="toast" id="toast">提交成功！感谢您的反馈</div>
@@ -132,39 +132,19 @@
             <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
             <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
         </div>
-        <!-- 极验验证码容器 -->
-        <div id="geetest-container"></div>
+        <!-- Turnstile人机验证（替换原极验容器） -->
+        <div id="cf-turnstile-wrap">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEC6mhJzAlHLK2f0"></div>
+        </div>
         <button id="submit-btn">提交反馈</button>
         <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
     </div>
 
     <script>
         // ================= 配置区域 =================
-        const GT_CAPTCHA_ID = "24413e26eeea0851c62e9237828731c4b";
         const API_PATH = "/.netlify/functions/submit";
-
-        // 存储验证码票据与实例
-        let geetestTicket = null;
-        let gtInstance = null;
-
-        // 极验V4 【bind嵌入模式】页面直接显示滑块
-        initGeetest4({
-            captchaId: GT_CAPTCHA_ID,
-            product: "bind",
-            riskType: "slide",
-            onSuccess: function (result) {
-                geetestTicket = result;
-                console.log("验证成功票据", result);
-            },
-            onError: function(err) {
-                console.error("验证码加载失败", err);
-            },
-            onClose: function() {
-                console.log("验证码关闭");
-            }
-        }, function (gt) {
-            gtInstance = gt;
-        });
+        // Turnstile校验接口地址
+        const VERIFY_PATH = "/.netlify/functions/verify-turnstile";
 
         // 绑定提交按钮
         const submitBtn = document.getElementById("submit-btn");
@@ -176,6 +156,10 @@
             const msg = document.getElementById("content").value.trim();
             const btn = document.getElementById("submit-btn");
 
+            // 获取Turnstile验证token
+            const tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
+            const token = tokenInput.value;
+
             if (!name) {
                 alert("请填写姓名！");
                 return;
@@ -184,7 +168,7 @@
                 alert("请填写反馈内容！");
                 return;
             }
-            if (!geetestTicket) {
+            if (!token) {
                 alert("请先完成人机验证！");
                 return;
             }
@@ -192,18 +176,30 @@
             btn.disabled = true;
             btn.textContent = "提交中...";
 
-            fetch(API_PATH, {
+            // 第一步：后端校验Turnstile
+            fetch(VERIFY_PATH, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    name: name,
-                    phone: tel,
-                    content: msg,
-                    lot_number: geetestTicket.lot_number,
-                    pass_token: geetestTicket.pass_token,
-                    gen_time: geetestTicket.gen_time
+                body: JSON.stringify({ token })
+            })
+            .then(res => res.json())
+            .then(verifyResult=>{
+                if(!verifyResult.success){
+                    throw new Error("人机验证失败，请重新验证");
+                }
+                // 验证通过，提交反馈数据
+                return fetch(API_PATH, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        phone: tel,
+                        content: msg
+                    })
                 })
             })
             .then(res => res.json())
@@ -213,17 +209,15 @@
                     document.getElementById("username").value = "";
                     document.getElementById("phone").value = "";
                     document.getElementById("content").value = "";
-                    // 重置验证码状态
-                    geetestTicket = null;
-                    gtInstance.reset();
+                    // 重置Turnstile验证框
+                    window.turnstile.reset(document.querySelector(".cf-turnstile"));
                 } else {
                     alert("提交失败：" + (data.msg || "请稍后重试"));
-                    geetestTicket = null;
-                    gtInstance.reset();
+                    window.turnstile.reset(document.querySelector(".cf-turnstile"));
                 }
             })
             .catch(err => {
-                alert("网络异常，请稍后重试");
+                alert(err.message || "网络异常，请稍后重试");
                 console.error(err);
             })
             .finally(() => {
