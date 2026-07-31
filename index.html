@@ -107,6 +107,10 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+        /* 验证码容器间距 */
+        #geetest-container {
+            margin:12px 0;
+        }
     </style>
     <!-- 极验四代SDK -->
     <script src="https://static.geetest.com/v4/gt4.js"></script>
@@ -128,44 +132,41 @@
             <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
             <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
         </div>
-        <!-- 极验容器 -->
+        <!-- 极验验证码容器 -->
         <div id="geetest-container"></div>
-        <!-- 移除原生onclick -->
         <button id="submit-btn">提交反馈</button>
         <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
     </div>
 
     <script>
-        // ================= 配置区 请替换为你极验后台的captcha_id =================
-        const GT_CAPTCHA_ID = "24413e26eea0851c62e9237828731c4b";
+        // ================= 配置区域 =================
+        const GT_CAPTCHA_ID = "24413e26eeea0851c62e9237828731c4b";
         const API_PATH = "/.netlify/functions/submit";
 
-        // 保存极验验证票据
+        // 存储验证码票据与实例
         let geetestTicket = null;
         let gtInstance = null;
 
-        // 初始化极验4代
-        // 初始化极验4代【bind嵌入模式，页面直接显示滑块】
-initGeetest4({
-    captchaId: GT_CAPTCHA_ID,
-    product: "bind",       // 嵌入模式，在容器内直接展示验证码
-    riskType: "slide",
-    onSuccess: function (result) {
-        // 用户拖动滑块验证成功，获取校验票据
-        geetestTicket = result;
-        console.log("验证票据", result);
-    },
-    onError: function(err) {
-        console.error("验证码加载失败", err);
-    },
-    onClose: function() {
-        console.log("验证码弹窗关闭");
-    }
-}, function (gt) {
-    gtInstance = gt;
-});
+        // 极验V4 【bind嵌入模式】页面直接显示滑块
+        initGeetest4({
+            captchaId: GT_CAPTCHA_ID,
+            product: "bind",
+            riskType: "slide",
+            onSuccess: function (result) {
+                geetestTicket = result;
+                console.log("验证成功票据", result);
+            },
+            onError: function(err) {
+                console.error("验证码加载失败", err);
+            },
+            onClose: function() {
+                console.log("验证码关闭");
+            }
+        }, function (gt) {
+            gtInstance = gt;
+        });
 
-        // 提交按钮监听
+        // 绑定提交按钮
         const submitBtn = document.getElementById("submit-btn");
         submitBtn.addEventListener("click", submitData);
 
@@ -183,11 +184,8 @@ initGeetest4({
                 alert("请填写反馈内容！");
                 return;
             }
-            // 判断是否完成人机验证
             if (!geetestTicket) {
                 alert("请先完成人机验证！");
-                // 唤起验证弹窗
-                gtInstance.showCaptcha();
                 return;
             }
 
@@ -203,7 +201,6 @@ initGeetest4({
                     name: name,
                     phone: tel,
                     content: msg,
-                    // 传递极验全套票据给后端校验
                     lot_number: geetestTicket.lot_number,
                     pass_token: geetestTicket.pass_token,
                     gen_time: geetestTicket.gen_time
@@ -213,16 +210,14 @@ initGeetest4({
             .then(data => {
                 if (data.success) {
                     showToast();
-                    // 清空表单
                     document.getElementById("username").value = "";
                     document.getElementById("phone").value = "";
                     document.getElementById("content").value = "";
-                    // 重置验证码状态，防止重复提交
+                    // 重置验证码状态
                     geetestTicket = null;
                     gtInstance.reset();
                 } else {
                     alert("提交失败：" + (data.msg || "请稍后重试"));
-                    // 验证失败，重置验证码
                     geetestTicket = null;
                     gtInstance.reset();
                 }
