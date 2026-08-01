@@ -2,22 +2,20 @@ export async function onRequest(context) {
   const { request, env } = context;
   const TURNSTILE_SECRET = env.TURNSTILE_SECRET;
 
-  // 处理 OPTIONS 预检
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
+  };
+
+  // 处理浏览器OPTIONS预检请求
   if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Max-Age": "86400"
-      }
-    });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  // 只允许POST
   if (request.method !== "POST") {
-    return Response.json({ success: false, error: "Method not allowed" }, { status: 405 });
+    return Response.json({ success: false, error: "Method not allowed" }, { status: 405, headers: corsHeaders });
   }
 
   try {
@@ -30,19 +28,9 @@ export async function onRequest(context) {
       method: "POST",
       body: formData
     });
-
     const data = await res.json();
-    return Response.json(data, {
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    return Response.json(data, { headers: corsHeaders });
   } catch (err) {
-    return Response.json({ success: false, error: err.message }, {
-      status: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    return Response.json({ success: false, error: err.message }, { status: 500, headers: corsHeaders });
   }
 }
