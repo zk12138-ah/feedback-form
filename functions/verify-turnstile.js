@@ -1,24 +1,20 @@
-export async function onRequest(context) {
+// 处理OPTIONS预检
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400"
+    }
+  });
+}
+
+// 处理POST
+export async function onRequestPost(context) {
   const { request, env } = context;
   const TURNSTILE_SECRET = env.TURNSTILE_SECRET;
-
-  // 处理 OPTIONS 预检
-  if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Max-Age": "86400"
-      }
-    });
-  }
-
-  // 只允许POST
-  if (request.method !== "POST") {
-    return Response.json({ success: false, error: "Method not allowed" }, { status: 405 });
-  }
 
   try {
     const { token } = await request.json();
