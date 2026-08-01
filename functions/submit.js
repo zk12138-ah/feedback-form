@@ -1,56 +1,44 @@
-export async function onRequestPost(context) {
+export async function onRequest(context) {
   const { request, env } = context;
-  const SUPABASE_URL = env.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
+  };
 
-  // 处理跨域 OPTIONS 预检请求
   if (request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
-    });
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+  if (request.method !== "POST") {
+    return Response.json({ success: false, msg: "仅支持POST请求" }, { status: 405, headers: corsHeaders });
   }
 
   try {
-    const payload = await request.json();
-    // ！！！把下方 table_name 替换成你Supabase真实数据表名称
-    const table = "feedback";
+    const { name, phone, content } = await request.json();
+    const supabaseUrl = env.SUPABASE_URL;
+    const supabaseKey = env.SUPABASE_SERVICE_KEY;
 
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    const resp = await fetch(`${supabaseUrl}/rest/v1/feedback`, {
       method: "POST",
       headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal"
+        "Prefer": "return=representation"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        name,
+        phone,
+        content,
+        create_time: new Date().toISOString()
+      })
     });
 
-    if (!resp.ok) {
-      const errorText = await resp.text();
-      return Response.json({ success: false, msg: errorText }, {
-        status: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
-    }
-
-    return Response.json({ success: true, msg: "提交成功" }, {
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    const result = await resp.json();
+    if (!resp.ok) throw new Error(JSON.stringify(result));
+    return Response.json({ success: true, data: result }, { headers: corsHeaders });
   } catch (err) {
-    return Response.json({ success: false, msg: err.message }, {
-      status: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    return Response.json({ success: false, error: err.message }, { status: 500, headers: corsHeaders });
   }
 }
