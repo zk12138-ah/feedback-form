@@ -112,8 +112,8 @@
             margin:12px 0;
         }
     </style>
-    <!-- Turnstile脚本 -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/site.js" defer></script>
+    <!-- ✅ 修复：正确的Turnstile脚本地址 -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/sitekey.js" defer></script>
 </head>
 <body>
     <div class="toast" id="toast">提交成功！感谢您的反馈</div>
@@ -132,16 +132,16 @@
             <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
             <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
         </div>
-        <!-- Turnstile人机验证，已填入你的SiteKey -->
+        <!-- ⚠️【重要】把data-sitekey的值替换成你新建Turnstile部件得到的新SiteKey -->
         <div id="cf-turnstile-wrap">
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEC6mhJzAlHLK2f0"></div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
         </div>
         <button id="submit-btn">提交反馈</button>
         <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
     </div>
 
 <script>
-// ================= 接口配置 =================
+// ================= 接口配置（相对路径无需改动） =================
 const API_PATH = "/functions/submit";
 const VERIFY_PATH = "/functions/verify-turnstile";
 
@@ -157,7 +157,6 @@ function submitData() {
     const btn = document.getElementById("submit-btn");
     const tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
 
-    // 防止元素找不到触发 Cannot read property 'value' of null 报错
     if (!nameInput || !contentInput) {
         alert("页面表单加载异常，请刷新页面！");
         return;
@@ -197,7 +196,13 @@ function submitData() {
         },
         body: JSON.stringify({ token: captchaToken })
     })
-    .then(res => res.json())
+    .then(async res => {
+        // 捕获http错误状态码
+        if (!res.ok) {
+            throw new Error(`接口请求异常，状态码：${res.status}`);
+        }
+        return res.json();
+    })
     .then(verifyResult=>{
         if(!verifyResult.success){
             throw new Error("人机验证失败，请重新勾选验证");
@@ -215,7 +220,10 @@ function submitData() {
             })
         })
     })
-    .then(res => res.json())
+    .then(async res => {
+        if (!res.ok) throw new Error(`提交接口异常，状态码：${res.status}`);
+        return res.json();
+    })
     .then(data => {
         if (data.success) {
             showToast();
@@ -235,8 +243,8 @@ function submitData() {
         }
     })
     .catch(err => {
-        console.error(err);
-        alert(err.message || "网络异常，请稍后重试");
+        console.error("请求错误详情：", err);
+        alert(err.message || "网络请求被阻断（大概率跨域问题，请等待后端CORS配置部署完成）");
     })
     .finally(() => {
         btn.disabled = false;
