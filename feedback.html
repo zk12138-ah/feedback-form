@@ -5,7 +5,7 @@ margin:12px 0;
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
-@@ -132,7 +131,6 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
 <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
 </div>
@@ -13,7 +13,7 @@ margin:12px 0;
 <div id="cf-turnstile-wrap">
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
 </div>
-@@ -141,16 +139,14 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 </div>
 
 <script>
@@ -31,7 +31,7 @@ function submitData() {
 const nameInput = document.getElementById("username");
 const phoneInput = document.getElementById("phone");
 const contentInput = document.getElementById("content");
-@@ -188,7 +184,7 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 btn.disabled = true;
 btn.textContent = "提交中...";
 
@@ -40,7 +40,7 @@ btn.textContent = "提交中...";
 fetch(VERIFY_PATH, {
 method: "POST",
 headers: {
-@@ -197,8 +193,11 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 body: JSON.stringify({ token: captchaToken })
 })
 .then(async res => {
@@ -53,7 +53,7 @@ if (!res.ok) {
 throw new Error(`接口请求异常，状态码：${res.status}`);
 }
 return res.json();
-@@ -207,7 +206,7 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 if(!verifyResult.success){
 throw new Error("人机验证失败，请重新勾选验证");
 }
@@ -62,7 +62,7 @@ throw new Error("人机验证失败，请重新勾选验证");
 return fetch(API_PATH, {
 method: "POST",
 headers: {
-@@ -237,21 +236,25 @@ <h2 class="title">自习室意见反馈</h2>
+ <h2 class="title">自习室意见反馈</h2>
 }
 } else {
 alert("提交失败：" + (data.msg || "请稍后重试"));
