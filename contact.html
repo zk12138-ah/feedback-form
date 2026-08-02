@@ -51,6 +51,25 @@
             line-height:1.8;
             color:#333;
             margin-bottom:10px;
+        .map-btn {
+    width: 100%;
+    padding:16px;
+    background:#3488eb;
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    font-size:18px;
+    cursor:pointer;
+    transition:0.22s ease;
+    margin-top:12px;
+}
+.map-btn:hover {
+    background:#2777d4;
+    transform: translateY(-2px);
+}
+.map-btn:active {
+    transform: scale(0.97);
+}
         }
     </style>
 </head>
@@ -62,8 +81,8 @@
         </div>
 
         <div class="content-card">
-            <h3>📍 门店地址</h3>
-            <p>【百度地图搜索：青云自习室】</p>
+           <a href="https://map.baidu.com/search/?q=青云自习室" target="_blank">
+    <button class="map-btn">📍 点击导航前往青云自习室</button> </a>
 
             <h3>📞 咨询电话</h3>
             <p>管理员热线：15912382652 / 15977669068</p>
