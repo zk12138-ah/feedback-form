@@ -74,7 +74,7 @@
             transform: scale(0.97);
         }
 
-        /* ===== 双视频布局样式 ===== */
+        /* ===== 双视频布局【修复视频裁切】 ===== */
         .video-tip{
             margin:18px 0 12px;
             font-size:15px;
@@ -85,14 +85,19 @@
             display:flex;
             gap:12px;
         }
-        .location-video{
+        .video-item{
             flex:1;
+        }
+        .location-video{
             width:100%;
             border-radius:14px;
             background:#f0f4fc;
             display:block;
+            /* 关键修复：contain 完整显示画面，不裁切 */
+            object-fit: contain;
+            background-color:#f0f4fc;
         }
-        /* 手机屏幕窄的时候自动竖排 */
+        /* 手机窄屏自动上下堆叠 */
         @media (max-width:420px){
             .video-wrap{
                 flex-direction:column;
@@ -180,12 +185,16 @@
             <!-- ========== 双视频并列区域 ========== -->
             <p class="video-tip">导航无法唤起？观看门店指引视频</p>
             <div class="video-wrap">
-                <video class="location-video" controls preload="metadata">
-                    <source src="video1.mp4" type="video/mp4">
-                </video>
-                <video class="location-video" controls preload="metadata">
-                    <source src="video2.mp4" type="video/mp4">
-                </video>
+                <div class="video-item">
+                    <video class="location-video" controls preload="metadata">
+                        <source src="video1.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="video-item">
+                    <video class="location-video" controls preload="metadata">
+                        <source src="video2.mp4" type="video/mp4">
+                    </video>
+                </div>
             </div>
 
             <div class="div-line"></div>
