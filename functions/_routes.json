@@ -1,5 +1,9 @@
 {
   "version": 1,
-  "include": ["/*"],
+  "include": [
+    "/submit",
+    "/verify-turnstile",
+    "/turnstile-proxy"
+  ],
   "exclude": []
 }
