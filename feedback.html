@@ -109,13 +109,11 @@
                 <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
             </div>
 
-            <!-- 重点：完整参数强制渲染交互式验证框 -->
             <div class="cf-turnstile"
                  data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"
                  data-action="feedback_form"
                  data-size="normal"
-                 data-theme="auto"
-                 data-callback="turnstileCallback">
+                 data-theme="auto">
             </div>
 
             <button type="submit" id="submitBtn">提交反馈</button>
@@ -124,18 +122,11 @@
 
     <div id="toast"></div>
 
-    <!-- Turnstile 官方正确JS地址 -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/turnstile.js" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
         const submitBtn = document.getElementById("submitBtn");
         const toastDom = document.getElementById("toast");
-        let turnstileToken = "";
-
-        // 人机验证回调函数
-        window.turnstileCallback = function (token) {
-            turnstileToken = token;
-        };
 
         function showToast(msg) {
             toastDom.innerText = msg;
@@ -149,33 +140,32 @@
             submitBtn.textContent = "提交中...";
 
             try {
-                if (!turnstileToken) {
+                // 关键改动：提交时主动获取token，不再只依赖回调
+                const token = window.turnstile.getResponse();
+                if (!token) {
                     showToast("请先完成人机验证");
                     submitBtn.disabled = false;
                     submitBtn.textContent = "提交反馈";
                     return;
                 }
 
-                // 调用turnstile验证接口
                 const verifyRes = await fetch("/verify-turnstile", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ token: turnstileToken })
+                    body: JSON.stringify({ token })
                 });
                 const verifyData = await verifyRes.json();
 
                 if (!verifyData.success) {
-                    showToast("人机验证失败，请重新勾选");
-                    turnstileToken = "";
+                    showToast("人机验证失败，请稍后重试");
                     window.turnstile.reset();
                     submitBtn.disabled = false;
                     submitBtn.textContent = "提交反馈";
                     return;
                 }
 
-                // 提交反馈数据
                 const formData = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
@@ -194,7 +184,6 @@
                 if (submitResult.success) {
                     showToast("提交成功！感谢您的反馈");
                     form.reset();
-                    turnstileToken = "";
                     window.turnstile.reset();
                 } else {
                     showToast("提交失败：" + submitResult.errMsg);
