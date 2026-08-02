@@ -122,7 +122,8 @@
 
     <div id="toast"></div>
 
-    <script src="https://challenges.cloudflare.com/turnstile/v0/turnstile.js" defer></script>
+    <!-- ✅修正：使用官方正确文件名 site.js -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/site.js" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
         const submitBtn = document.getElementById("submitBtn");
@@ -140,7 +141,6 @@
             submitBtn.textContent = "提交中...";
 
             try {
-                // 关键改动：提交时主动获取token，不再只依赖回调
                 const token = window.turnstile.getResponse();
                 if (!token) {
                     showToast("请先完成人机验证");
@@ -159,7 +159,7 @@
                 const verifyData = await verifyRes.json();
 
                 if (!verifyData.success) {
-                    showToast("人机验证失败，请稍后重试");
+                    showToast("人机验证失败，请重新勾选");
                     window.turnstile.reset();
                     submitBtn.disabled = false;
                     submitBtn.textContent = "提交反馈";
