@@ -16,11 +16,11 @@
             background-image: url("logo-bg.png");
             background-repeat: no-repeat;
             background-position: top 120px center;
-            background-size: 600px auto;
+            background-size: 320px auto;
             min-height: 100vh;
         }
 
-        /* 标题区域 */
+        /* 标题区域【最终定稿样式】 */
         .header-logo-area {
             text-align:center;
             margin-top:140px;
@@ -28,38 +28,39 @@
         }
         .main-title {
             font-size:56px;
-            color:1a3480;
+            color:#1a3480;
             font-weight:700;
             letter-spacing:10px;
         }
         .en-title {
             font-size:26px;
-            color:black;
-            margin:8px 0;
-            letter-spacing:10px;
+            color:balck;
+            margin:14px 0;
+            letter-spacing:6px;
         }
         .tagline {
             font-size:28px;
-            color:1a3480;
+            color:#1a3480;
+            margin-top:12px;
             font-weight:700;
-            letter-spacing:6px;
+            letter-spacing:10px;
         }
 
-        /* 功能按钮区 4个圆形按钮 */
+        /* 功能按钮区域 */
         .func-wrap {
             padding:36px 16px 16px;
         }
         .func-row {
             display:grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap:12px;
+            grid-template-columns: repeat(5, 1fr);
+            gap:10px;
         }
         .func-item {
             text-align:center;
         }
         .circle-btn {
-            width:76px;
-            height:76px;
+            width:70px;
+            height:70px;
             border-radius:50%;
             background:#3488eb;
             margin:0 auto 10px;
@@ -67,10 +68,10 @@
             align-items:center;
             justify-content:center;
             color:#fff;
-            font-size:32px;
+            font-size:28px;
         }
         .func-name {
-            font-size:16px;
+            font-size:15px;
             color:#222;
         }
         .func-desc {
@@ -80,22 +81,30 @@
             font-size:15px;
         }
 
-        /* 两大卡片：热门服务 / 最新通知 */
+        /* 两大卡片：热门服务 / 最新通知（可点击链接） */
         .card-container {
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:16px;
             padding:24px 16px;
         }
+        .card-link {
+            text-decoration: none;
+        }
         .card {
             background:#fff;
             border-radius:16px;
             box-shadow:0 2px 12px rgba(0,0,0,0.06);
             padding:24px 20px;
+            transition: 0.2s ease;
+        }
+        .card:active{
+            transform: scale(0.97);
         }
         .card h3 {
             font-size:24px;
             margin-bottom:16px;
+            color:#1a3480;
         }
         .card p {
             font-size:16px;
@@ -112,7 +121,7 @@
         <div class="tagline">自习 | 备考 | 阅读</div>
     </div>
 
-    <!-- 四大功能入口 -->
+    <!-- 功能入口 -->
     <div class="func-wrap">
         <div class="func-row">
             <div class="func-item">
@@ -139,20 +148,30 @@
                 </a>
                 <div class="func-name">联系我们</div>
             </div>
+            <div class="func-item">
+                <a href="developer.html">
+                    <div class="circle-btn">👨‍💻</div>
+                </a>
+                <div class="func-name">开发人员</div>
+            </div>
         </div>
         <div class="func-desc">自习室预约、意见反馈、服务指南一站式入口</div>
     </div>
 
-    <!-- 双卡片区域 -->
+    <!-- 卡片区域（点击跳转） -->
     <div class="card-container">
-        <div class="card">
-            <h3>热门服务</h3>
-            <p>智能选座 一键预约<br>超时提醒 贴心服务</p>
-        </div>
-        <div class="card">
-            <h3>最新通知</h3>
-            <p>暑期自习室开放时间调整<br>新增通宵自习区域</p>
-        </div>
+        <a href="service.html" class="card-link">
+            <div class="card">
+                <h3>热门服务</h3>
+                <p>智能选座 一键预约<br>超时提醒 贴心服务</p>
+            </div>
+        </a>
+        <a href="notice.html" class="card-link">
+            <div class="card">
+                <h3>最新通知</h3>
+                <p>暑期营业时间调整<br>新增通宵自习区域</p>
+            </div>
+        </a>
     </div>
 
 </body>
