@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 移动端标准视口，已确认正确 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>青云自习室</title>
     <style>
         * {
@@ -23,7 +24,7 @@
         /* 标题区域【最终定稿样式】 */
         .header-logo-area {
             text-align:center;
-            margin-top:280px;
+            margin-top:140px;
             padding:0 10px;
         }
         .main-title {
@@ -131,6 +132,42 @@
             font-size:16px;
             color:#333;
             line-height:1.7;
+        }
+
+        /* ========== 移动端响应式规则 ========== */
+        @media (max-width: 640px) {
+            body {
+                background-size: 220px auto;
+                background-position: top 90px center;
+            }
+            .header-logo-area {
+                margin-top: 100px;
+            }
+            .main-title {
+                font-size: 36px;
+                letter-spacing:5px;
+            }
+            .en-title {
+                font-size:18px;
+            }
+            .tagline {
+                font-size:20px;
+                letter-spacing:4px;
+            }
+            /* 手机按钮改为3列 */
+            .func-row {
+                grid-template-columns: repeat(3,1fr);
+                gap:14px;
+            }
+            .circle-btn {
+                width:62px;
+                height:62px;
+                font-size:24px;
+            }
+            /* 卡片改成单列 */
+            .card-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
