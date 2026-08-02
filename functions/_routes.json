@@ -3,7 +3,8 @@
   "include": [
     "/submit",
     "/verify-turnstile",
-    "/seats"
+    "/seats",
+    "/update-seat"
   ],
   "exclude": []
 }
