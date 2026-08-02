@@ -1,5 +1,5 @@
 {
   "version": 1,
-  "include": ["/submit", "/verify-turnstile"],
-  "exclude": ["/*"]
+  "include": ["/*"],
+  "exclude": []
 }
