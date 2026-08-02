@@ -1,94 +1,233 @@
-margin:12px 0;
-}
-</style>
-    <!-- ✅ 修复：正确的Turnstile脚本地址 -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自习室意见反馈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body {
+            background-color: #f0f7ff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .feedback-card {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0, 80, 180, 0.1);
+        }
+        .title {
+            text-align: center;
+            color: #1a4b94;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .form-item {
+            margin-bottom: 22px;
+        }
+        .form-item label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-item label .required {
+            color: #ff4d4f;
+        }
+        .form-item input,
+        .form-item textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d0e0f5;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-item input:focus,
+        .form-item textarea:focus {
+            border-color: #3678d3;
+        }
+        .form-item textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .cf-turnstile {
+            margin: 12px 0 24px;
+        }
+        #submit-btn {
+            width: 100%;
+            padding: 13px;
+            background-color: #2b6bcd;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #submit-btn:disabled {
+            background-color: #80a8e0;
+            cursor: not-allowed;
+        }
+        #toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        #toast.show {
+            opacity: 1;
+        }
+    </style>
+    <!-- Turnstile 官方脚本 -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
- <h2 class="title">自习室意见反馈</h2>
-<label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
-<textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
-</div>
-        <!-- ⚠️【重要】把data-sitekey的值替换成你新建Turnstile部件得到的新SiteKey -->
-<div id="cf-turnstile-wrap">
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
-</div>
- <h2 class="title">自习室意见反馈</h2>
-</div>
+    <div class="feedback-card">
+        <h2 class="title">自习室意见反馈</h2>
 
-<script>
-// ================= 接口配置（相对路径无需改动） =================
-// 接口路径（和functions内文件名严格对应，无需修改）
-const API_PATH = "/submit";
-const VERIFY_PATH = "/verify-turnstile";
+        <div class="form-item">
+            <label>姓名 <span class="required">*</span></label>
+            <input type="text" id="username" placeholder="请输入您的姓名">
+        </div>
 
-// 绑定提交按钮
-const submitBtn = document.getElementById("submit-btn");
-submitBtn.addEventListener("click", submitData);
+        <div class="form-item">
+            <label>联系电话</label>
+            <input type="tel" id="phone" placeholder="选填，方便我们回复您">
+        </div>
 
-function submitData() {
-    // 获取表单元素
-const nameInput = document.getElementById("username");
-const phoneInput = document.getElementById("phone");
-const contentInput = document.getElementById("content");
- <h2 class="title">自习室意见反馈</h2>
-btn.disabled = true;
-btn.textContent = "提交中...";
+        <div class="form-item">
+            <label>反馈内容 <span class="required">*</span></label>
+            <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
+        </div>
 
-    // 第一步：后端校验Turnstile
-    // Turnstile验证请求
-fetch(VERIFY_PATH, {
-method: "POST",
-headers: {
- <h2 class="title">自习室意见反馈</h2>
-body: JSON.stringify({ token: captchaToken })
-})
-.then(async res => {
-        // 捕获http错误状态码
-if (!res.ok) {
-            // 区分405报错提示，方便你定位问题
-            if(res.status === 405){
-                throw new Error("接口405错误：后端OPTIONS跨域处理未部署成功，请检查functions文件");
-            }
-throw new Error(`接口请求异常，状态码：${res.status}`);
-}
-return res.json();
- <h2 class="title">自习室意见反馈</h2>
-if(!verifyResult.success){
-throw new Error("人机验证失败，请重新勾选验证");
-}
-        // 验证成功，提交反馈
-        // 验证通过，提交反馈数据
-return fetch(API_PATH, {
-method: "POST",
-headers: {
- <h2 class="title">自习室意见反馈</h2>
-}
-} else {
-alert("提交失败：" + (data.msg || "请稍后重试"));
-            if(window.turnstile){
+        <!-- Turnstile 验证组件 -->
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
+
+        <button id="submit-btn" type="button">提交反馈</button>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const API_PATH = "/submit";
+        const VERIFY_PATH = "/verify-turnstile";
+
+        const submitBtn = document.getElementById("submit-btn");
+        const toastEl = document.getElementById("toast");
+
+        submitBtn.addEventListener("click", submitData);
+
+        function showToast(text) {
+            toastEl.innerText = text;
+            toastEl.classList.add("show");
+            setTimeout(() => {
+                toastEl.classList.remove("show");
+            }, 2500);
+        }
+
+        function resetCaptcha() {
+            if (window.turnstile) {
                 window.turnstile.reset(document.querySelector(".cf-turnstile"));
             }
-            resetCaptcha();
-}
-})
-.catch(err => {
-console.error("请求错误详情：", err);
-        alert(err.message || "网络请求被阻断（大概率跨域问题，请等待后端CORS配置部署完成）");
-        alert(err.message);
-})
-.finally(() => {
-btn.disabled = false;
-btn.textContent = "提交反馈";
-});
-}
+        }
 
-function resetCaptcha(){
-    if(window.turnstile){
-        window.turnstile.reset(document.querySelector(".cf-turnstile"));
-    }
-}
+        async function submitData() {
+            const name = document.getElementById("username").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const content = document.getElementById("content").value.trim();
 
-function showToast() {
-const toast = document.getElementById("toast");
-toast.classList.add("show");
+            // 基础校验
+            if (!name) {
+                showToast("请填写姓名");
+                return;
+            }
+            if (!content) {
+                showToast("请填写反馈内容");
+                return;
+            }
+
+            // 获取 Turnstile token
+            let token = "";
+            try {
+                if (window.turnstile) {
+                    token = window.turnstile.getResponse();
+                }
+            } catch (e) {
+                console.error("获取验证token失败:", e);
+            }
+
+            if (!token) {
+                showToast("请先完成人机验证");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "提交中...";
+
+            try {
+                // 第一步：校验人机验证
+                const verifyRes = await fetch(VERIFY_PATH, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token })
+                });
+
+                if (!verifyRes.ok) {
+                    throw new Error(`验证接口异常，状态码：${verifyRes.status}`);
+                }
+
+                const verifyData = await verifyRes.json();
+                if (!verifyData.success) {
+                    throw new Error("人机验证失败，请重新勾选");
+                }
+
+                // 第二步：提交反馈
+                const submitRes = await fetch(API_PATH, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, phone, content })
+                });
+
+                const submitData = await submitRes.json();
+
+                if (submitData.success) {
+                    showToast("提交成功！感谢您的反馈");
+                    // 清空表单
+                    document.getElementById("username").value = "";
+                    document.getElementById("phone").value = "";
+                    document.getElementById("content").value = "";
+                    resetCaptcha();
+                } else {
+                    showToast(submitData.errMsg || "提交失败，请稍后重试");
+                    resetCaptcha();
+                }
+
+            } catch (err) {
+                console.error("请求错误:", err);
+                showToast(err.message || "网络请求失败，请稍后重试");
+                resetCaptcha();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "提交反馈";
+            }
+        }
+    </script>
+</body>
+</html>
