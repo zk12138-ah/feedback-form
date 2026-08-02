@@ -18,39 +18,6 @@
             background-position: top 120px center;
             background-size: 320px auto;
             min-height: 100vh;
-            padding-bottom: 110px;
-        }
-        /* 顶部搜索栏 */
-        .top-bar {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            gap:12px;
-        }
-        .search-box {
-            flex:1;
-            border:1px solid #c5d2e8;
-            border-radius:99px;
-            padding:10px 16px;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-        .search-box .check-icon {
-            color:#206bc9;
-            font-weight:bold;
-        }
-        .search-box span {
-            font-size:17px;
-            color:#222;
-        }
-        .top-icon {
-            width:36px;
-            height:36px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:22px;
         }
 
         /* 标题区域 */
@@ -133,46 +100,9 @@
             color:#333;
             line-height:1.7;
         }
-
-        /* 底部导航栏 */
-        .footer-nav {
-            position:fixed;
-            bottom:0;
-            left:0;
-            width:100%;
-            background:#fff;
-            display:grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            padding:10px 0 12px;
-            border-top:1px solid #eee;
-        }
-        .nav-item {
-            text-align:center;
-        }
-        .nav-icon {
-            font-size:26px;
-            margin-bottom:4px;
-        }
-        .nav-text {
-            font-size:15px;
-        }
-        .nav-item.active .nav-text{
-            color:#206bc9;
-        }
     </style>
 </head>
 <body>
-    <!-- 顶部栏 -->
-    <div class="top-bar">
-        <div class="search-box">
-            <span class="check-icon">☑</span>
-            <span>自习室服务平台</span>
-        </div>
-        <div class="top-icon">🔍</div>
-        <div class="top-icon">⟳</div>
-        <div class="top-icon">💼</div>
-    </div>
-
     <!-- Logo标题区域 -->
     <div class="header-logo-area">
         <h1 class="main-title">青云自习室</h1>
@@ -223,24 +153,5 @@
         </div>
     </div>
 
-    <!-- 底部导航 -->
-    <div class="footer-nav">
-        <div class="nav-item active">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-text">首页</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">📊</div>
-            <div class="nav-text">服务</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">💬</div>
-            <div class="nav-text">消息</div>
-        </div>
-        <div class="nav-item">
-            <div class="nav-icon">👤</div>
-            <div class="nav-text">我的</div>
-        </div>
-    </div>
 </body>
 </html>
