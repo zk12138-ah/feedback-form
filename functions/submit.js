@@ -48,7 +48,7 @@ const serviceKey = env.SUPABASE_SERVICE_KEY;
 method: "POST",
 headers: {
 "apikey": serviceKey,
-@@ -39,9 +53,14 @@ export async function onRequest(context) {
+ export async function onRequest(context) {
 });
 
 const data = await res.json();
