@@ -98,7 +98,7 @@
         <form id="feedbackForm">
             <div class="form-item">
                 <label>您的姓名 <span style="color:#f04438">*</span></label>
-                <input type="text" id="name" required placeholder="请输入姓名，建议使用昵称！！！">
+                <input type="text" id="name" required placeholder="请输入姓名">
             </div>
             <div class="form-item">
                 <label>联系电话</label>
@@ -108,15 +108,15 @@
                 <label>反馈内容 <span style="color:#f04438">*</span></label>
                 <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
             </div>
-            <!-- Turnstile人机验证，替换为你自己的Sitekey -->
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
+            <!-- 修改为你自己 Turnstile 的 SiteKey -->
+            <div class="cf-turnstile" data-sitekey="填入你的sitekey"></div>
             <button type="submit" id="submitBtn">提交反馈</button>
         </form>
     </div>
 
     <div id="toast"></div>
 
-    <!-- Turnstile官方脚本 -->
+    <!-- Turnstile 脚本 -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/siteverify" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
@@ -135,7 +135,6 @@
             submitBtn.textContent = "提交中...";
 
             try {
-                // 获取turnstile验证token
                 const token = window.turnstile.getResponse();
                 if (!token) {
                     showToast("请先完成人机验证");
@@ -144,8 +143,8 @@
                     return;
                 }
 
-                // 第一步：调用turnstile验证接口
-                const verifyRes = await fetch("/functions/verify-turnstile", {
+                // 人机验证接口
+                const verifyRes = await fetch("/verify-turnstile", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -161,13 +160,13 @@
                     return;
                 }
 
-                // 第二步：提交反馈数据到supabase接口
+                // 提交反馈接口
                 const payload = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
                     content: document.getElementById("content").value.trim()
                 };
-                const submitRes = await fetch("/functions/submit", {
+                const submitRes = await fetch("/submit", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -181,10 +180,10 @@
                     form.reset();
                     window.turnstile.reset();
                 } else {
-                    showToast("提交失败：" + (submitResult.msg || "服务器异常"));
+                    showToast("提交失败：" + (submitResult.errMsg || submitResult.msg || "服务器异常"));
                 }
             } catch (err) {
-                console.error("请求错误详情：", err);
+                console.error(err);
                 showToast("网络异常，请稍后重试");
             }
 
