@@ -23,27 +23,26 @@
         /* 标题区域【最终定稿样式】 */
         .header-logo-area {
             text-align:center;
-            margin-top:140px;
+            margin-top:280px;
             padding:0 10px;
         }
         .main-title {
             font-size:56px;
             color:#1a3480;
             font-weight:700;
-            letter-spacing:10px;
+            letter-spacing:8px;
         }
         .en-title {
             font-size:26px;
-            color:balck;
+            color:#222;
             margin:14px 0;
-            letter-spacing:6px;
+            letter-spacing:2px;
         }
         .tagline {
             font-size:28px;
             color:#1a3480;
             margin-top:12px;
-            font-weight:700;
-            letter-spacing:10px;
+            letter-spacing:6px;
         }
 
         /* 功能按钮区域 */
@@ -58,6 +57,10 @@
         .func-item {
             text-align:center;
         }
+        .func-item a {
+            text-decoration: none;
+            display:block;
+        }
         .circle-btn {
             width:70px;
             height:70px;
@@ -69,6 +72,19 @@
             justify-content:center;
             color:#fff;
             font-size:28px;
+            /* 灵动动画核心 */
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+            box-shadow: 0 3px 8px rgba(52, 136, 235, 0.25);
+        }
+        /* 悬浮效果 */
+        .circle-btn:hover {
+            transform: translateY(-5px) scale(1.06);
+            box-shadow: 0 7px 16px rgba(52, 136, 235, 0.35);
+        }
+        /* 点击按压回弹 */
+        .circle-btn:active {
+            transform: translateY(0) scale(0.94);
+            box-shadow: 0 2px 4px rgba(52, 136, 235, 0.2);
         }
         .func-name {
             font-size:15px;
@@ -81,7 +97,7 @@
             font-size:15px;
         }
 
-        /* 两大卡片：热门服务 / 最新通知（可点击链接） */
+        /* 两大卡片：热门服务 / 最新通知 */
         .card-container {
             display:grid;
             grid-template-columns:1fr 1fr;
@@ -96,7 +112,12 @@
             border-radius:16px;
             box-shadow:0 2px 12px rgba(0,0,0,0.06);
             padding:24px 20px;
-            transition: 0.2s ease;
+            /* 卡片动画 */
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+        .card:hover{
+            transform: translateY(-4px);
+            box-shadow:0 8px 20px rgba(26, 52, 128, 0.12);
         }
         .card:active{
             transform: scale(0.97);
