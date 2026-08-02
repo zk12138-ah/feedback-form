@@ -108,7 +108,6 @@
                 <label>反馈内容 <span style="color:#f04438">*</span></label>
                 <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
             </div>
-            <!-- 修改为你自己 Turnstile 的 SiteKey -->
             <div class="cf-turnstile" data-sitekey="填入你的sitekey"></div>
             <button type="submit" id="submitBtn">提交反馈</button>
         </form>
@@ -116,7 +115,6 @@
 
     <div id="toast"></div>
 
-    <!-- Turnstile 脚本 -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/siteverify" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
@@ -143,7 +141,6 @@
                     return;
                 }
 
-                // 人机验证接口
                 const verifyRes = await fetch("/verify-turnstile", {
                     method: "POST",
                     headers: {
@@ -160,7 +157,6 @@
                     return;
                 }
 
-                // 提交反馈接口
                 const payload = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
