@@ -22,237 +22,175 @@
             background: #ffffff;
             padding: 36px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(20, 80, 180, 0.12);
+            box-shadow: 0 4px 20px rgba(0,60,130,0.08);
         }
-        .title {
+        h1 {
             text-align: center;
-            font-size: 24px;
-            color: #0f4c92;
-            margin-bottom: 28px;
-            font-weight: 600;
+            color: #194080;
+            margin-bottom: 32px;
+            font-size: 26px;
         }
         .form-item {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
         label {
             display: block;
-            font-size: 15px;
-            color: #333;
             margin-bottom: 8px;
+            color: #222;
+            font-weight: 500;
         }
         input, textarea {
             width: 100%;
-            padding: 13px 16px;
-            border: 1px solid #d0e0f5;
+            padding: 12px 14px;
+            border: 1px solid #cbd7e8;
             border-radius: 10px;
             font-size: 15px;
-            transition: 0.3s all ease;
             outline: none;
+            transition: border 0.2s;
         }
         input:focus, textarea:focus {
-            border-color: #2374d9;
-            box-shadow: 0 0 0 3px rgba(35, 116, 217, 0.15);
+            border-color: #3478e8;
         }
         textarea {
-            min-height: 130px;
-            resize: none;
+            min-height: 120px;
+            resize: vertical;
         }
-        #submit-btn {
+        .cf-turnstile {
+            margin: 12px 0 24px;
+        }
+        #submitBtn {
             width: 100%;
             padding: 14px;
+            background-color: #2563eb;
+            color: #fff;
             border: none;
             border-radius: 10px;
-            background: linear-gradient(135deg, #1f6ed8, #0d50b3);
-            color: white;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top:12px;
+            transition: background 0.2s;
         }
-        #submit-btn:hover {
-            background: linear-gradient(135deg, #1860c2, #0a4091);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(15, 76, 146, 0.25);
-        }
-        #submit-btn:active {
-            transform: translateY(0);
-        }
-        #submit-btn:disabled {
-            opacity: 0.6;
+        #submitBtn:disabled {
+            background-color: #82a8ee;
             cursor: not-allowed;
-            transform: none;
         }
-        .tip-text {
-            margin-top: 16px;
-            font-size: 13px;
-            color: #777;
-            text-align: center;
-        }
-        .toast {
+        #toast {
             position: fixed;
-            top: 30px;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: #52c41a;
-            color: white;
+            top: 30px;
+            transform: translateX(-50%);
+            background: #222;
+            color: #fff;
             padding: 12px 24px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             opacity: 0;
-            transition: all 0.3s ease;
+            pointer-events: none;
+            transition: opacity 0.25s;
             z-index: 999;
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
+        #toast.show {
             opacity: 1;
         }
-        /* Turnstile验证码间距 */
-        #cf-turnstile-wrap {
-            margin:12px 0;
-        }
     </style>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
-    <div class="toast" id="toast">提交成功！感谢您的反馈</div>
-    
     <div class="feedback-card">
-        <h2 class="title">自习室意见反馈</h2>
-        <div class="form-item">
-            <label>您的姓名 <span style="color: #ff4d4f;">*</span></label>
-            <input id="username" placeholder="请输入姓名，建议输入昵称！！">
-        </div>
-        <div class="form-item">
-            <label>联系电话</label>
-            <input id="phone" placeholder="选填，方便联系您">
-        </div>
-        <div class="form-item">
-            <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
-            <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
-        </div>
-        <div id="cf-turnstile-wrap">
+        <h1>自习室意见反馈</h1>
+        <form id="feedbackForm">
+            <div class="form-item">
+                <label>您的姓名 <span style="color:#f04438">*</span></label>
+                <input type="text" id="name" required placeholder="请输入姓名">
+            </div>
+            <div class="form-item">
+                <label>联系电话</label>
+                <input type="tel" id="phone" placeholder="选填，方便回访">
+            </div>
+            <div class="form-item">
+                <label>反馈内容 <span style="color:#f04438">*</span></label>
+                <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
+            </div>
+            <!-- Turnstile人机验证，替换为你自己的Sitekey -->
             <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
-        </div>
-        <button id="submit-btn">提交反馈</button>
-        <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
+            <button type="submit" id="submitBtn">提交反馈</button>
+        </form>
     </div>
 
-<script>
-// 接口路径
-const API_PATH = "/submit";
-const VERIFY_PATH = "/verify-turnstile";
+    <div id="toast"></div>
 
-const submitBtn = document.getElementById("submit-btn");
-submitBtn.addEventListener("click", submitData);
+    <!-- Turnstile官方脚本 -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/siteverify" defer></script>
+    <script>
+        const form = document.getElementById("feedbackForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const toastDom = document.getElementById("toast");
 
-function submitData() {
-    const nameInput = document.getElementById("username");
-    const phoneInput = document.getElementById("phone");
-    const contentInput = document.getElementById("content");
-    const btn = document.getElementById("submit-btn");
-    const tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
+        function showToast(msg) {
+            toastDom.innerText = msg;
+            toastDom.classList.add("show");
+            setTimeout(() => toastDom.classList.remove("show"), 2500);
+        }
 
-    if (!nameInput || !contentInput) {
-        alert("页面表单加载异常，请刷新页面！");
-        return;
-    }
-    if (!tokenInput) {
-        alert("人机验证组件尚未加载完成，请稍候再提交！");
-        return;
-    }
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = "提交中...";
 
-    const name = nameInput.value.trim();
-    const tel = phoneInput.value.trim();
-    const msg = contentInput.value.trim();
-    const captchaToken = tokenInput.value;
+            try {
+                // 获取turnstile验证token
+                const token = window.turnstile.getResponse();
+                if (!token) {
+                    showToast("请先完成人机验证");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "提交反馈";
+                    return;
+                }
 
-    // 表单校验
-    if (!name) {
-        alert("请填写姓名！");
-        return;
-    }
-    if (!msg) {
-        alert("请填写反馈内容！");
-        return;
-    }
-    if (!captchaToken) {
-        alert("请先完成人机验证！");
-        return;
-    }
+                // 第一步：调用turnstile验证接口
+                const verifyRes = await fetch("/functions/verify-turnstile", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ token })
+                });
+                const verifyData = await verifyRes.json();
+                if (!verifyData.success) {
+                    showToast("人机验证失败，请重试");
+                    window.turnstile.reset();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "提交反馈";
+                    return;
+                }
 
-    btn.disabled = true;
-    btn.textContent = "提交中...";
+                // 第二步：提交反馈数据到supabase接口
+                const payload = {
+                    name: document.getElementById("name").value.trim(),
+                    phone: document.getElementById("phone").value.trim(),
+                    content: document.getElementById("content").value.trim()
+                };
+                const submitRes = await fetch("/functions/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const submitResult = await submitRes.json();
 
-    // Turnstile验证请求【已移除Content-Type请求头】
-    fetch(VERIFY_PATH, {
-        method: "POST",
-        body: JSON.stringify({ token: captchaToken })
-    })
-    .then(async res => {
-        if (!res.ok) {
-            if(res.status === 405){
-                throw new Error("接口405错误：后端OPTIONS跨域处理未部署成功，请检查functions文件");
+                if (submitResult.success) {
+                    showToast("提交成功！感谢反馈");
+                    form.reset();
+                    window.turnstile.reset();
+                } else {
+                    showToast("提交失败：" + (submitResult.msg || "服务器异常"));
+                }
+            } catch (err) {
+                console.error("请求错误详情：", err);
+                showToast("网络异常，请稍后重试");
             }
-            throw new Error(`接口请求异常，状态码：${res.status}`);
-        }
-        return res.json();
-    })
-    .then(verifyResult=>{
-        if(!verifyResult.success){
-            throw new Error("人机验证失败，请重新勾选验证");
-        }
-        // 验证通过，提交反馈数据【已移除Content-Type请求头】
-        return fetch(API_PATH, {
-            method: "POST",
-            body: JSON.stringify({
-                name: name,
-                phone: tel,
-                content: msg
-            })
-        })
-    })
-    .then(async res => {
-        if (!res.ok) throw new Error(`提交接口异常，状态码：${res.status}`);
-        return res.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showToast();
-            // 清空表单
-            nameInput.value = "";
-            phoneInput.value = "";
-            contentInput.value = "";
-            // 重置验证码
-            if(window.turnstile){
-                window.turnstile.reset(document.querySelector(".cf-turnstile"));
-            }
-        } else {
-            alert("提交失败：" + (data.msg || "请稍后重试"));
-            resetCaptcha();
-        }
-    })
-    .catch(err => {
-        console.error("请求错误详情：", err);
-        alert(err.message);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.textContent = "提交反馈";
-    });
-}
 
-function resetCaptcha(){
-    if(window.turnstile){
-        window.turnstile.reset(document.querySelector(".cf-turnstile"));
-    }
-}
-
-function showToast() {
-    const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2500);
-}
-</script>
+            submitBtn.disabled = false;
+            submitBtn.textContent = "提交反馈";
+        });
+    </script>
 </body>
 </html>
