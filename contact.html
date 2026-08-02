@@ -73,6 +73,32 @@
         .map-btn:active {
             transform: scale(0.97);
         }
+
+        /* ===== 双视频布局样式 ===== */
+        .video-tip{
+            margin:18px 0 12px;
+            font-size:15px;
+            color:#666;
+            text-align:center;
+        }
+        .video-wrap{
+            display:flex;
+            gap:12px;
+        }
+        .location-video{
+            flex:1;
+            width:100%;
+            border-radius:14px;
+            background:#f0f4fc;
+            display:block;
+        }
+        /* 手机屏幕窄的时候自动竖排 */
+        @media (max-width:420px){
+            .video-wrap{
+                flex-direction:column;
+            }
+        }
+
         .div-line {
             height:1px;
             background:#e2e8f0;
@@ -151,6 +177,17 @@
             <!--唤起弹窗按钮-->
             <button class="map-btn" id="openMapPopup">📍 点击一键导航前往</button>
 
+            <!-- ========== 双视频并列区域 ========== -->
+            <p class="video-tip">导航无法唤起？观看门店指引视频</p>
+            <div class="video-wrap">
+                <video class="location-video" controls preload="metadata">
+                    <source src="video1.mp4" type="video/mp4">
+                </video>
+                <video class="location-video" controls preload="metadata">
+                    <source src="video2.mp4" type="video/mp4">
+                </video>
+            </div>
+
             <div class="div-line"></div>
 
             <div class="contact-item">☎ 咨询电话：【15912382652】</div>
@@ -171,9 +208,9 @@
     </div>
 
 <script>
-// ========== 在这里修改自习室完整地址！！ ==========
+// ========== 修改自习室完整地址！！ ==========
 const DEST_ADDRESS = "青云自习室";
-// 示例完整版：const DEST_ADDRESS = "青云自习室 玉溪市XX区XX街道XX号";
+//建议填写完整地址：青云自习室 玉溪市XX区XX街道XX号
 
 const mask = document.getElementById('mask');
 const openBtn = document.getElementById('openMapPopup');
@@ -205,26 +242,21 @@ mapButtons.forEach(btn=>{
 
         switch(type){
             case "baidu":
-                //唤起百度地图APP
                 schemeUrl = `baidumap://map/search?q=${address}`;
                 webUrl = `https://map.baidu.com/search/?q=${address}`;
                 break;
             case "amap":
-                //唤起高德地图APP
                 schemeUrl = `amapuri://search/search?keyword=${address}`;
                 webUrl = `https://amap.com/search?keyword=${address}`;
                 break;
             case "tencent":
-                //唤起腾讯地图APP
                 schemeUrl = `qqmap://map/search?keyword=${address}`;
                 webUrl = `https://map.qq.com/m/search?keyword=${address}`;
                 break;
         }
 
         mask.style.display = 'none';
-        //尝试打开APP
         window.location.href = schemeUrl;
-        //350ms后APP唤起失败，跳转网页版
         setTimeout(()=>{
             window.location.href = webUrl;
         }, 350);
