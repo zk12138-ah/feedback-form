@@ -4,7 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>热门服务 | 青云自习室</title>
+   
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f8fafe;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            color:#1a3480;
+            font-size:16px;
+            margin-bottom:24px;
+        }
+        .title-box {
+            text-align:center;
+            margin-bottom:24px;
+        }
+        .title-box h1{
+            color:#1a3480;
+            font-size:32px;
+            letter-spacing:2px;
+        }
+        .content-card {
+            background:#ffffff;
+            border-radius:16px;
+            padding:28px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.06);
+        }
+        .content-card h3 {
+            color:#1a3480;
+            margin:22px 0 12px;
+            font-size:20px;
+        }
+        .content-card p {
+            font-size:17px;
+            line-height:1.8;
+            color:#333;
+            margin-bottom:10px;
+        }
+        .content-card ul{
+            padding-left:22px;
+            margin-bottom:14px;
+        }
+        .content-card li{
+            font-size:16px;
+            line-height:1.75;
+            color:#333;
+            margin-bottom:8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="back-btn">← 返回首页</a>
+        <div class="title-box">
+            <h1>热门服务介绍</h1>
+        </div>
+
+        <div class="content-card">
+            <h3>📌 座位预约(线上预约功能开发中，敬请期待！！)</h3>
+            <ul>
+                <li>请直接联系管理员预约。（微信号：jc_qingyun）</li>                
+            </ul>
+
+
+            <h3>💡 温馨提示</h3>
+            <p>离开后请随手关灯关门，谢谢配合！</p>
+
+            <style>
   .seat-map-section {
     max-width: 720px;
     margin: 40px auto;
@@ -175,82 +253,6 @@ async function loadSeatMap() {
 // 页面加载时渲染
 loadSeatMap();
 </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
-        }
-        body {
-            background-color: #f8fafe;
-            padding: 30px 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .back-btn {
-            display: inline-block;
-            text-decoration: none;
-            color:#1a3480;
-            font-size:16px;
-            margin-bottom:24px;
-        }
-        .title-box {
-            text-align:center;
-            margin-bottom:24px;
-        }
-        .title-box h1{
-            color:#1a3480;
-            font-size:32px;
-            letter-spacing:2px;
-        }
-        .content-card {
-            background:#ffffff;
-            border-radius:16px;
-            padding:28px;
-            box-shadow:0 2px 12px rgba(0,0,0,0.06);
-        }
-        .content-card h3 {
-            color:#1a3480;
-            margin:22px 0 12px;
-            font-size:20px;
-        }
-        .content-card p {
-            font-size:17px;
-            line-height:1.8;
-            color:#333;
-            margin-bottom:10px;
-        }
-        .content-card ul{
-            padding-left:22px;
-            margin-bottom:14px;
-        }
-        .content-card li{
-            font-size:16px;
-            line-height:1.75;
-            color:#333;
-            margin-bottom:8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="./index.html" class="back-btn">← 返回首页</a>
-        <div class="title-box">
-            <h1>热门服务介绍</h1>
-        </div>
-
-        <div class="content-card">
-            <h3>📌 座位预约(线上预约功能开发中，敬请期待！！)</h3>
-            <ul>
-                <li>请直接联系管理员预约。（微信号：jc_qingyun）</li>                
-            </ul>
-
-
-            <h3>💡 温馨提示</h3>
-            <p>离开后请随手关灯关门，谢谢配合！</p>
         </div>
     </div>
 </body>
