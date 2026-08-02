@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自习室简介 | 青云自习室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f8fafe;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            color:#1a3480;
+            font-size:16px;
+            margin-bottom:24px;
+        }
+        .title-box {
+            text-align:center;
+            margin-bottom:20px;
+        }
+        .title-box h1{
+            color:#1a3480;
+            font-size:32px;
+            letter-spacing:2px;
+        }
+
+        /* 图片轮播 */
+        .slider-wrap {
+            width: 100%;
+            height: 240px;
+            border-radius:16px;
+            overflow:hidden;
+            position:relative;
+            margin-bottom:28px;
+            background:#e8f0fc;
+        }
+        .slider-list {
+            display:flex;
+            height:100%;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slider-item {
+            flex:0 0 100%;
+        }
+        .slider-item img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+        .slider-btn {
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            width:36px;
+            height:36px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.75);
+            border:none;
+            font-size:18px;
+            cursor:pointer;
+            color:#222;
+        }
+        .prev {left:10px;}
+        .next {right:10px;}
+        .slider-dots {
+            position:absolute;
+            bottom:10px;
+            left:50%;
+            transform:translateX(-50%);
+            display:flex;
+            gap:8px;
+        }
+        .dot {
+            width:9px;
+            height:9px;
+            border-radius:50%;
+            background:#cccccc;
+        }
+        .dot.active {
+            background:#3488eb;
+        }
+
+        .content-card {
+            background:#ffffff;
+            border-radius:16px;
+            padding:28px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.06);
+        }
+        .content-card p {
+            font-size:17px;
+            line-height:1.8;
+            color:#333;
+            margin-bottom:16px;
+        }
+        .content-card h3 {
+            color:#1a3480;
+            margin:22px 0 10px;
+            font-size:20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="back-btn">← 返回首页</a>
+        <div class="title-box">
+            <h1>青云自习室简介</h1>
+        </div>
+
+        <div class="slider-wrap">
+            <div class="slider-list" id="sliderList">
+                <div class="slider-item">
+                    <img src="img1.jpg" alt="自习室环境">
+                </div>
+                <div class="slider-item">
+                    <img src="img2.jpg" alt="自习室环境">
+                </div>
+                <div class="slider-item">
+                    <img src="img3.jpg" alt="自习室环境">
+                </div>
+                <div class="slider-item">
+                    <img src="img4.jpg" alt="自习室环境">
+                </div>
+            </div>
+            <button class="slider-btn prev" id="prevBtn">‹</button>
+            <button class="slider-btn next" id="nextBtn">›</button>
+            <div class="slider-dots" id="dotsBox"></div>
+        </div>
+
+        <div class="content-card">
+            <p>青云自习室是面向备考学生、阅读爱好者打造的安静沉浸式学习空间，致力于提供舒适、整洁、安静的自习环境。</p>
+            <h3>📌 环境介绍</h3>
+            <p>自习室配备护眼台灯、舒适座椅、微波炉、饮用水、储物柜等配套设施吗，保障学习不受打扰。并且自习室免费提供耳塞、小零食、花茶等小福利。厕所卫生干净整洁，保证一天打扫一次卫生，为您提供一个舒适干净的自习室环境。</p>
+            <h3>📌 适合人群</h3>
+            <p>考研、考公、考证备考同学、上班族学习、日常阅读写作爱好者。</p>
+            <h3>📌 开放特点</h3>
+            <p>设立常规营业时间，满足不同学习时段需求。定期维护室内卫生，营造长期稳定的学习氛围。</p>
+        </div>
+    </div>
+
+<script>
+const sliderList = document.getElementById('sliderList');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const dotsBox = document.getElementById('dotsBox');
+const items = document.querySelectorAll('.slider-item');
+let index = 0;
+const total = items.length;
+
+for(let i=0; i<total; i++){
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    if(i === 0) dot.classList.add('active');
+    dot.onclick = ()=>goSlide(i);
+    dotsBox.appendChild(dot);
+}
+const dots = document.querySelectorAll('.dot');
+
+function goSlide(num){
+    index = num;
+    sliderList.style.transform = `translateX(-${index * 100}%)`;
+    dots.forEach((d,i)=> d.classList.toggle('active', i === index));
+}
+function nextSlide(){
+    index = (index + 1) % total;
+    goSlide(index);
+}
+function prevSlide(){
+    index = (index -1 + total) % total;
+    goSlide(index);
+}
+
+nextBtn.addEventListener('click', nextSlide);
+prevBtn.addEventListener('click', prevSlide);
+
+let timer = setInterval(nextSlide, 3000);
+document.querySelector('.slider-wrap').addEventListener('mouseenter',()=>clearInterval(timer));
+document.querySelector('.slider-wrap').addEventListener('mouseleave',()=>timer = setInterval(nextSlide,3000));
+</script>
+</body>
+</html>
