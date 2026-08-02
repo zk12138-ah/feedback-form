@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>座位管理后台 - 青云自习室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background: #f0f7ff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0, 80, 180, 0.08);
+        }
+        h2 {
+            color: #1a4b94;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .login-box {
+            max-width: 360px;
+            margin: 40px auto;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d0e0f5;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .login-box input:focus {
+            border-color: #3678d3;
+        }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: #2b6bcd;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1e5ab8;
+        }
+        .btn:disabled {
+            background: #80a8e0;
+            cursor: not-allowed;
+        }
+        .seat-panel {
+            display: none;
+        }
+        .seat-panel.active {
+            display: block;
+        }
+        .seat-summary {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 15px;
+        }
+        .seat-summary strong {
+            color: #1a4b94;
+            font-size: 18px;
+            margin-right: 4px;
+        }
+        .seat-map-wrap {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+        #seatMap {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .seat {
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.2s;
+        }
+        .seat:hover {
+            transform: scale(1.08);
+        }
+        .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 1.5; }
+        .seat-occupied { fill: #ef4444; stroke: #dc2626; stroke-width: 1.5; }
+        .seat-maintenance { fill: #94a3b8; stroke: #64748b; stroke-width: 1.5; }
+
+        .seat-legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #475569;
+            justify-content: center;
+        }
+        .seat-legend .dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .dot.available { background: #22c55e; }
+        .dot.occupied { background: #ef4444; }
+        .dot.maintenance { background: #94a3b8; }
+
+        .status-menu {
+            position: fixed;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            padding: 8px 0;
+            z-index: 999;
+            display: none;
+            min-width: 140px;
+        }
+        .status-menu.active { display: block; }
+        .status-menu .item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .status-menu .item:hover {
+            background: #f1f5f9;
+        }
+        .tip {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>自习室座位管理后台</h2>
+
+        <!-- 密码登录区 -->
+        <div class="login-box" id="loginBox">
+            <input type="password" id="adminPwd" placeholder="请输入管理员密码">
+            <button class="btn" onclick="verifyAdmin()">进入管理</button>
+        </div>
+
+        <!-- 座位管理区 -->
+        <div class="seat-panel" id="seatPanel">
+            <div class="seat-summary">
+                <div><strong id="totalSeat">0</strong>总座位</div>
+                <div><strong id="availableSeat">0</strong>剩余可选</div>
+                <div><strong id="occupiedSeat">0</strong>已占用</div>
+            </div>
+
+            <div class="seat-map-wrap">
+                <svg id="seatMap" viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="20" width="410" height="260" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="200" y="20" width="50" height="260" fill="#f1f5f9"/>
+                    <text x="225" y="155" font-size="13" fill="#64748b" text-anchor="middle">过道</text>
+                    <text x="110" y="55" font-size="13" fill="#64748b" text-anchor="middle">A 区</text>
+                    <text x="340" y="55" font-size="13" fill="#64748b" text-anchor="middle">B 区</text>
+                </svg>
+            </div>
+
+            <div class="seat-legend">
+                <span><span class="dot available"></span> 可选</span>
+                <span><span class="dot occupied"></span> 已占用</span>
+                <span><span class="dot maintenance"></span> 维护中</span>
+            </div>
+
+            <p class="tip">点击座位即可切换状态</p>
+        </div>
+    </div>
+
+    <!-- 右键/点击弹出的状态菜单 -->
+    <div class="status-menu" id="statusMenu">
+        <div class="item" onclick="changeSeatStatus('available')">设为可选</div>
+        <div class="item" onclick="changeSeatStatus('occupied')">设为已占用</div>
+        <div class="item" onclick="changeSeatStatus('maintenance')">设为维护中</div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentSeatNo = "";
+        let adminPassword = "";
+
+        function showToast(text) {
+            const toast = document.getElementById("toast");
+            toast.innerText = text;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+        }
+
+        // 验证管理员密码
+        function verifyAdmin() {
+            const pwd = document.getElementById("adminPwd").value.trim();
+            if (!pwd) {
+                showToast("请输入管理员密码");
+                return;
+            }
+            adminPassword = pwd;
+            // 先拉一次座位数据验证权限
+            loadSeatData().then(() => {
+                document.getElementById("loginBox").style.display = "none";
+                document.getElementById("seatPanel").classList.add("active");
+                showToast("登录成功");
+            }).catch(err => {
+                showToast(err.message || "密码错误");
+            });
+        }
+
+        // 加载座位数据
+        async function loadSeatData() {
+            const res = await fetch("/seats");
+            const result = await res.json();
+            if (!result.success) throw new Error(result.errMsg || "加载失败");
+
+            document.getElementById("totalSeat").textContent = result.total;
+            document.getElementById("availableSeat").textContent = result.available;
+            document.getElementById("occupiedSeat").textContent = result.occupied;
+
+            const svg = document.getElementById("seatMap");
+            // 清空旧座位
+            svg.querySelectorAll(".seat, .seat-text").forEach(el => el.remove());
+
+            result.list.forEach(seat => {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", seat.pos_x);
+                rect.setAttribute("y", seat.pos_y);
+                rect.setAttribute("width", "36");
+                rect.setAttribute("height", "48");
+                rect.setAttribute("rx", "4");
+                rect.setAttribute("class", `seat seat-${seat.status}`);
+                rect.setAttribute("data-seat", seat.seat_no);
+                rect.addEventListener("click", e => openStatusMenu(e, seat.seat_no));
+                svg.appendChild(rect);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("class", "seat-text");
+                text.setAttribute("x", seat.pos_x + 18);
+                text.setAttribute("y", seat.pos_y + 29);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", "11");
+                text.setAttribute("fill", "#ffffff");
+                text.setAttribute("pointer-events", "none");
+                text.textContent = seat.seat_no.split("-")[1];
+                svg.appendChild(text);
+            });
+        }
+
+        // 打开状态选择菜单
+        function openStatusMenu(e, seatNo) {
+            e.stopPropagation();
+            currentSeatNo = seatNo;
+            const menu = document.getElementById("statusMenu");
+            menu.style.left = e.clientX + "px";
+            menu.style.top = e.clientY + "px";
+            menu.classList.add("active");
+        }
+
+        // 点击空白处关闭菜单
+        document.addEventListener("click", () => {
+            document.getElementById("statusMenu").classList.remove("active");
+        });
+
+        // 修改座位状态
+        async function changeSeatStatus(status) {
+            if (!currentSeatNo) return;
+            try {
+                const res = await fetch("/update-seat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        seat_no: currentSeatNo,
+                        status,
+                        password: adminPassword
+                    })
+                });
+                const result = await res.json();
+                if (!result.success) throw new Error(result.errMsg);
+
+                showToast("更新成功");
+                loadSeatData();
+            } catch (err) {
+                showToast(err.message || "更新失败");
+            }
+        }
+    </script>
+</body>
+</html>
