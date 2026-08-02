@@ -1,5 +1,9 @@
 export async function onRequest(context) {
   const { request, env } = context;
+  console.log("SUPABASE_URL:",env.SUPABASE_URL);
+  console.log("SUPABASE_ANON_KEY:",env.SUPABASE_ANON_KEY);
+export async function onRequest(context) {
+  const { request, env } = context;
 
   // CORS 跨域头部
   const corsHeaders = {
