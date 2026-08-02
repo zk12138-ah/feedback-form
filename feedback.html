@@ -108,16 +108,16 @@
                 <label>反馈内容 <span style="color:#f04438">*</span></label>
                 <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
             </div>
-            <!-- 此处填入你的 Turnstile SiteKey -->
-            <div class="cf-turnstile" data-sitekey="填入你的sitekey"></div>
+            <!-- ⚠务必填入你自己Turnstile的SiteKey -->
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
             <button type="submit" id="submitBtn">提交反馈</button>
         </form>
     </div>
 
     <div id="toast"></div>
 
-    <!-- Turnstile JS -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/siteverify" defer></script>
+    <!-- ✅【修复重点】正确的Turnstile前端JS地址 -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/turnstile.js" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
         const submitBtn = document.getElementById("submitBtn");
@@ -135,7 +135,6 @@
             submitBtn.textContent = "提交中...";
 
             try {
-                // 获取人机验证token
                 const token = window.turnstile.getResponse();
                 if (!token) {
                     showToast("请先完成人机验证");
@@ -144,7 +143,6 @@
                     return;
                 }
 
-                // 1. 请求turnstile验证接口 /verify-turnstile
                 const verifyRes = await fetch("/verify-turnstile", {
                     method: "POST",
                     headers: {
@@ -154,7 +152,6 @@
                 });
                 const verifyData = await verifyRes.json();
 
-                // 后端返回原生turnstile结构 {success:boolean}
                 if (!verifyData.success) {
                     showToast("人机验证失败，请重新勾选");
                     window.turnstile.reset();
@@ -163,7 +160,6 @@
                     return;
                 }
 
-                // 2. 组装表单数据，提交到 /submit
                 const formData = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
