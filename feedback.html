@@ -22,46 +22,49 @@
             background: #ffffff;
             padding: 36px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,60,130,0.08);
+            box-shadow: 0 4px 18px rgba(0,80,180,0.1);
         }
-        h1 {
+        .feedback-card h1 {
             text-align: center;
-            color: #194080;
-            margin-bottom: 32px;
-            font-size: 26px;
+            color: #1a4b94;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
         .form-item {
             margin-bottom: 22px;
         }
-        label {
+        .form-item label {
             display: block;
             margin-bottom: 8px;
-            color: #222;
+            color: #333;
             font-weight: 500;
         }
-        input, textarea {
+        .form-item input,
+        .form-item textarea {
             width: 100%;
             padding: 12px 14px;
-            border: 1px solid #cbd7e8;
+            border: 1px solid #d0e0f5;
             border-radius: 10px;
             font-size: 15px;
             outline: none;
             transition: border 0.2s;
         }
-        input:focus, textarea:focus {
-            border-color: #3478e8;
+        .form-item input:focus,
+        .form-item textarea:focus {
+            border-color: #3678d3;
         }
-        textarea {
+        .form-item textarea {
             min-height: 120px;
             resize: vertical;
         }
+        /* Turnstile容器 */
         .cf-turnstile {
-            margin: 12px 0 24px;
+            margin:10px 0 24px;
         }
-        #submitBtn {
+        #submit-btn {
             width: 100%;
-            padding: 14px;
-            background-color: #2563eb;
+            padding: 13px;
+            background-color: #2b6bcd;
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -69,133 +72,127 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        #submitBtn:disabled {
-            background-color: #82a8ee;
+        #submit-btn:disabled {
+            background-color: #80a8e0;
             cursor: not-allowed;
         }
         #toast {
             position: fixed;
+            bottom: 40px;
             left: 50%;
-            top: 30px;
             transform: translateX(-50%);
-            background: #222;
-            color: #fff;
             padding: 12px 24px;
+            background: rgba(0,0,0,0.75);
+            color: white;
             border-radius: 8px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.25s;
-            z-index: 999;
+            transition: opacity 0.3s;
         }
         #toast.show {
             opacity: 1;
         }
     </style>
+    <!-- ✅重点：已经替换为同源代理地址 -->
+    <script src="/turnstile-proxy" defer></script>
 </head>
 <body>
     <div class="feedback-card">
         <h1>自习室意见反馈</h1>
         <form id="feedbackForm">
             <div class="form-item">
-                <label>您的姓名 <span style="color:#f04438">*</span></label>
-                <input type="text" id="name" required placeholder="请输入姓名">
+                <label>姓名 *</label>
+                <input type="text" id="name" required placeholder="请输入您的姓名">
             </div>
             <div class="form-item">
                 <label>联系电话</label>
-                <input type="tel" id="phone" placeholder="选填，方便回访">
+                <input type="tel" id="phone" placeholder="选填，方便我们回复您">
             </div>
             <div class="form-item">
-                <label>反馈内容 <span style="color:#f04438">*</span></label>
-                <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
+                <label>反馈内容 *</label>
+                <textarea id="content" required placeholder="请详细描述您的意见或建议"></textarea>
             </div>
 
-            <div class="cf-turnstile"
-                 data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"
-                 data-action="feedback_form"
-                 data-size="normal"
-                 data-theme="auto">
-            </div>
+            <!-- 替换成你自己Turnstile组件的Sitekey -->
+            <div class="cf-turnstile" data-sitekey="在此填入你的SITEKEY"></div>
 
-            <button type="submit" id="submitBtn">提交反馈</button>
+            <button id="submit-btn" type="submit">提交反馈</button>
         </form>
     </div>
 
     <div id="toast"></div>
 
-    <!-- ✅修正：使用官方正确文件名 site.js -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/site.js" defer></script>
     <script>
-        const form = document.getElementById("feedbackForm");
-        const submitBtn = document.getElementById("submitBtn");
-        const toastDom = document.getElementById("toast");
+        const form = document.getElementById('feedbackForm');
+        const submitBtn = document.getElementById('submit-btn');
+        const toast = document.getElementById('toast');
 
-        function showToast(msg) {
-            toastDom.innerText = msg;
-            toastDom.classList.add("show");
-            setTimeout(() => toastDom.classList.remove("show"), 2500);
+        function showToast(text) {
+            toast.innerText = text;
+            toast.classList.add("show");
+            setTimeout(()=>toast.classList.remove("show"),2500);
         }
 
-        form.addEventListener("submit", async function (e) {
+        form.addEventListener('submit', async function(e){
             e.preventDefault();
             submitBtn.disabled = true;
-            submitBtn.textContent = "提交中...";
+
+            // 获取人机验证token
+            let token;
+            try {
+                token = turnstile.getResponse();
+            } catch(err) {
+                showToast("人机验证组件加载失败，请刷新页面重试");
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if(!token){
+                showToast("请先完成人机验证");
+                submitBtn.disabled = false;
+                return;
+            }
 
             try {
-                const token = window.turnstile.getResponse();
-                if (!token) {
-                    showToast("请先完成人机验证");
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "提交反馈";
-                    return;
-                }
-
+                // 第一步：校验人机验证
                 const verifyRes = await fetch("/verify-turnstile", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ token })
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body: JSON.stringify({token})
                 });
                 const verifyData = await verifyRes.json();
-
-                if (!verifyData.success) {
+                if(!verifyData.success){
                     showToast("人机验证失败，请重新勾选");
-                    window.turnstile.reset();
+                    turnstile.reset();
                     submitBtn.disabled = false;
-                    submitBtn.textContent = "提交反馈";
                     return;
                 }
 
-                const formData = {
+                // 第二步：提交反馈数据
+                const payload = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
                     content: document.getElementById("content").value.trim()
                 };
-
                 const submitRes = await fetch("/submit", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(formData)
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body: JSON.stringify(payload)
                 });
-                const submitResult = await submitRes.json();
+                const submitData = await submitRes.json();
 
-                if (submitResult.success) {
+                if(submitData.success){
                     showToast("提交成功！感谢您的反馈");
                     form.reset();
-                    window.turnstile.reset();
-                } else {
-                    showToast("提交失败：" + submitResult.errMsg);
+                    turnstile.reset();
+                }else{
+                    showToast(submitData.errMsg || "提交失败，请稍后重试");
                 }
-
             } catch (err) {
-                console.error("请求异常：", err);
-                showToast("网络请求异常，请稍后重试");
+                showToast("网络异常，请检查网络后重试");
+                console.error(err);
             }
-
             submitBtn.disabled = false;
-            submitBtn.textContent = "提交反馈";
         });
     </script>
 </body>
