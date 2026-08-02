@@ -108,6 +108,7 @@
                 <label>反馈内容 <span style="color:#f04438">*</span></label>
                 <textarea id="content" required placeholder="请详细描述你的意见或建议"></textarea>
             </div>
+            <!-- 此处填入你的 Turnstile SiteKey -->
             <div class="cf-turnstile" data-sitekey="填入你的sitekey"></div>
             <button type="submit" id="submitBtn">提交反馈</button>
         </form>
@@ -115,6 +116,7 @@
 
     <div id="toast"></div>
 
+    <!-- Turnstile JS -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/siteverify" defer></script>
     <script>
         const form = document.getElementById("feedbackForm");
@@ -127,12 +129,13 @@
             setTimeout(() => toastDom.classList.remove("show"), 2500);
         }
 
-        form.addEventListener("submit", async function(e) {
+        form.addEventListener("submit", async function (e) {
             e.preventDefault();
             submitBtn.disabled = true;
             submitBtn.textContent = "提交中...";
 
             try {
+                // 获取人机验证token
                 const token = window.turnstile.getResponse();
                 if (!token) {
                     showToast("请先完成人机验证");
@@ -141,6 +144,7 @@
                     return;
                 }
 
+                // 1. 请求turnstile验证接口 /verify-turnstile
                 const verifyRes = await fetch("/verify-turnstile", {
                     method: "POST",
                     headers: {
@@ -149,38 +153,43 @@
                     body: JSON.stringify({ token })
                 });
                 const verifyData = await verifyRes.json();
+
+                // 后端返回原生turnstile结构 {success:boolean}
                 if (!verifyData.success) {
-                    showToast("人机验证失败，请重试");
+                    showToast("人机验证失败，请重新勾选");
                     window.turnstile.reset();
                     submitBtn.disabled = false;
                     submitBtn.textContent = "提交反馈";
                     return;
                 }
 
-                const payload = {
+                // 2. 组装表单数据，提交到 /submit
+                const formData = {
                     name: document.getElementById("name").value.trim(),
                     phone: document.getElementById("phone").value.trim(),
                     content: document.getElementById("content").value.trim()
                 };
+
                 const submitRes = await fetch("/submit", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(formData)
                 });
                 const submitResult = await submitRes.json();
 
                 if (submitResult.success) {
-                    showToast("提交成功！感谢反馈");
+                    showToast("提交成功！感谢您的反馈");
                     form.reset();
                     window.turnstile.reset();
                 } else {
-                    showToast("提交失败：" + (submitResult.errMsg || submitResult.msg || "服务器异常"));
+                    showToast("提交失败：" + submitResult.errMsg);
                 }
+
             } catch (err) {
-                console.error(err);
-                showToast("网络异常，请稍后重试");
+                console.error("请求异常：", err);
+                showToast("网络请求异常，请稍后重试");
             }
 
             submitBtn.disabled = false;
