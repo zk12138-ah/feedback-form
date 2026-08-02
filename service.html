@@ -5,6 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>热门服务 | 青云自习室</title>
     <style>
+  .seat-map-section {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 80, 180, 0.08);
+  }
+  .seat-map-section h3 {
+    color: #1a4b94;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .seat-summary {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    color: #555;
+    font-size: 15px;
+  }
+  .seat-summary strong {
+    color: #1a4b94;
+    font-size: 18px;
+    margin-right: 4px;
+  }
+  .seat-map-wrap {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+  #seatMap {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .seat {
+    cursor: default;
+    transition: opacity 0.2s;
+  }
+  .seat-available {
+    fill: #22c55e;
+    stroke: #16a34a;
+    stroke-width: 1.5;
+  }
+  .seat-occupied {
+    fill: #ef4444;
+    stroke: #dc2626;
+    stroke-width: 1.5;
+  }
+  .seat-maintenance {
+    fill: #94a3b8;
+    stroke: #64748b;
+    stroke-width: 1.5;
+  }
+  .seat-legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #475569;
+    justify-content: center;
+  }
+  .seat-legend .dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .dot.available { background: #22c55e; }
+  .dot.occupied { background: #ef4444; }
+  .dot.maintenance { background: #94a3b8; }
+  .room-label {
+    font-size: 13px;
+    fill: #64748b;
+  }
+</style>
+
+<div class="seat-map-section">
+  <h3>自习室座位实时状态</h3>
+  <div class="seat-summary">
+    <div><strong id="totalSeat">0</strong>总座位</div>
+    <div><strong id="availableSeat">0</strong>剩余可选</div>
+    <div><strong id="occupiedSeat">0</strong>已占用</div>
+  </div>
+
+  <div class="seat-map-wrap">
+    <svg id="seatMap" viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- 自习室外框 -->
+      <rect x="20" y="20" width="410" height="260" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+      <!-- 过道 -->
+      <rect x="200" y="20" width="50" height="260" fill="#f1f5f9"/>
+      <text x="225" y="155" class="room-label" text-anchor="middle">过道</text>
+      <!-- 区域标签 -->
+      <text x="110" y="55" class="room-label" text-anchor="middle">A 区</text>
+      <text x="340" y="55" class="room-label" text-anchor="middle">B 区</text>
+      <!-- 座位由JS动态生成 -->
+    </svg>
+  </div>
+
+  <div class="seat-legend">
+    <span><span class="dot available"></span> 可选</span>
+    <span><span class="dot occupied"></span> 已占用</span>
+    <span><span class="dot maintenance"></span> 维护中</span>
+  </div>
+</div>
+
+<script>
+async function loadSeatMap() {
+  const svg = document.getElementById("seatMap");
+  const totalEl = document.getElementById("totalSeat");
+  const availableEl = document.getElementById("availableSeat");
+  const occupiedEl = document.getElementById("occupiedSeat");
+
+  try {
+    const res = await fetch("/seats");
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.errMsg || "加载失败");
+    }
+
+    // 更新统计数字
+    totalEl.textContent = result.total;
+    availableEl.textContent = result.available;
+    occupiedEl.textContent = result.occupied;
+
+    // 清空旧座位
+    const oldSeats = svg.querySelectorAll(".seat");
+    oldSeats.forEach(el => el.remove());
+
+    // 动态生成座位
+    result.list.forEach(seat => {
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", seat.pos_x);
+      rect.setAttribute("y", seat.pos_y);
+      rect.setAttribute("width", "36");
+      rect.setAttribute("height", "48");
+      rect.setAttribute("rx", "4");
+      rect.setAttribute("class", `seat seat-${seat.status}`);
+      rect.setAttribute("data-seat", seat.seat_no);
+      rect.setAttribute("title", seat.seat_no);
+      svg.appendChild(rect);
+
+      // 座位编号文字
+      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("x", seat.pos_x + 18);
+      text.setAttribute("y", seat.pos_y + 29);
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("font-size", "11");
+      text.setAttribute("fill", "#ffffff");
+      text.setAttribute("pointer-events", "none");
+      text.textContent = seat.seat_no.split("-")[1];
+      svg.appendChild(text);
+    });
+
+  } catch (err) {
+    console.error("座位图加载失败:", err);
+    totalEl.textContent = "-";
+    availableEl.textContent = "-";
+    occupiedEl.textContent = "-";
+  }
+}
+
+// 页面加载时渲染
+loadSeatMap();
+</script>
+    <style>
         * {
             margin: 0;
             padding: 0;
