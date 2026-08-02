@@ -3,263 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自习室意见反馈</title>
+    <title>青云自习室</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft Yahei", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: "Microsoft Yahei", sans-serif;
         }
         body {
-            background-color: #f0f7ff;
-            padding: 40px 20px;
+            background-color: #ffffff;
+            background-image: url("logo-bg.png");
+            background-repeat: no-repeat;
+            background-position: top 120px center;
+            background-size: 320px auto;
             min-height: 100vh;
+            padding-bottom: 110px;
         }
-        .feedback-card {
-            max-width: 520px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 36px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(20, 80, 180, 0.12);
+        /* 顶部搜索栏 */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap:12px;
         }
-        .title {
-            text-align: center;
-            font-size: 24px;
-            color: #0f4c92;
-            margin-bottom: 28px;
-            font-weight: 600;
+        .search-box {
+            flex:1;
+            border:1px solid #c5d2e8;
+            border-radius:99px;
+            padding:10px 16px;
+            display:flex;
+            align-items:center;
+            gap:8px;
         }
-        .form-item {
-            margin-bottom: 20px;
+        .search-box .check-icon {
+            color:#206bc9;
+            font-weight:bold;
         }
-        label {
-            display: block;
-            font-size: 15px;
-            color: #333;
-            margin-bottom: 8px;
+        .search-box span {
+            font-size:17px;
+            color:#222;
         }
-        input, textarea {
-            width: 100%;
-            padding: 13px 16px;
-            border: 1px solid #d0e0f5;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: 0.3s all ease;
-            outline: none;
+        .top-icon {
+            width:36px;
+            height:36px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
         }
-        input:focus, textarea:focus {
-            border-color: #2374d9;
-            box-shadow: 0 0 0 3px rgba(35, 116, 217, 0.15);
+
+        /* 标题区域 */
+        .header-logo-area {
+            text-align:center;
+            margin-top:140px;
+            padding:0 10px;
         }
-        textarea {
-            min-height: 130px;
-            resize: none;
+        .main-title {
+            font-size:56px;
+            color:#1a3480;
+            font-weight:500;
+            letter-spacing:4px;
         }
-        #submit-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #1f6ed8, #0d50b3);
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top:12px;
+        .en-title {
+            font-size:26px;
+            color:#222;
+            margin:8px 0;
         }
-        #submit-btn:hover {
-            background: linear-gradient(135deg, #1860c2, #0a4091);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(15, 76, 146, 0.25);
+        .tagline {
+            font-size:28px;
+            color:#1a3480;
+            letter-spacing:2px;
         }
-        #submit-btn:active {
-            transform: translateY(0);
+
+        /* 功能按钮区 4个圆形按钮 */
+        .func-wrap {
+            padding:36px 16px 16px;
         }
-        #submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .func-row {
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap:12px;
         }
-        .tip-text {
-            margin-top: 16px;
-            font-size: 13px;
-            color: #777;
-            text-align: center;
+        .func-item {
+            text-align:center;
         }
-        .toast {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: #52c41a;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 999;
+        .circle-btn {
+            width:76px;
+            height:76px;
+            border-radius:50%;
+            background:#3488eb;
+            margin:0 auto 10px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#fff;
+            font-size:32px;
         }
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
+        .func-name {
+            font-size:16px;
+            color:#222;
         }
-        /* Turnstile验证码间距 */
-        #cf-turnstile-wrap {
-            margin:12px 0;
+        .func-desc {
+            text-align:center;
+            margin-top:14px;
+            color:#777;
+            font-size:15px;
+        }
+
+        /* 两大卡片：热门服务 / 最新通知 */
+        .card-container {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:16px;
+            padding:24px 16px;
+        }
+        .card {
+            background:#fff;
+            border-radius:16px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.06);
+            padding:24px 20px;
+        }
+        .card h3 {
+            font-size:24px;
+            margin-bottom:16px;
+        }
+        .card p {
+            font-size:16px;
+            color:#333;
+            line-height:1.7;
+        }
+
+        /* 底部导航栏 */
+        .footer-nav {
+            position:fixed;
+            bottom:0;
+            left:0;
+            width:100%;
+            background:#fff;
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding:10px 0 12px;
+            border-top:1px solid #eee;
+        }
+        .nav-item {
+            text-align:center;
+        }
+        .nav-icon {
+            font-size:26px;
+            margin-bottom:4px;
+        }
+        .nav-text {
+            font-size:15px;
+        }
+        .nav-item.active .nav-text{
+            color:#206bc9;
         }
     </style>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
-    <div class="toast" id="toast">提交成功！感谢您的反馈</div>
-    
-    <div class="feedback-card">
-        <h2 class="title">自习室意见反馈</h2>
-        <div class="form-item">
-            <label>您的姓名 <span style="color: #ff4d4f;">*</span></label>
-            <input id="username" placeholder="请输入姓名，建议输入昵称！！">
+    <!-- 顶部栏 -->
+    <div class="top-bar">
+        <div class="search-box">
+            <span class="check-icon">☑</span>
+            <span>自习室服务平台</span>
         </div>
-        <div class="form-item">
-            <label>联系电话</label>
-            <input id="phone" placeholder="选填，方便联系您">
-        </div>
-        <div class="form-item">
-            <label>反馈内容 <span style="color: #ff4d4f;">*</span></label>
-            <textarea id="content" placeholder="请详细描述遇到的问题或建议..."></textarea>
-        </div>
-        <div id="cf-turnstile-wrap">
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAAEDV5_MjcqtRkXAg"></div>
-        </div>
-        <button id="submit-btn">提交反馈</button>
-        <p class="tip-text">提交后管理员会尽快查看并处理您的反馈</p>
+        <div class="top-icon">🔍</div>
+        <div class="top-icon">⟳</div>
+        <div class="top-icon">💼</div>
     </div>
 
-<script>
-// 接口路径（和functions内文件名严格对应，无需修改）
-const API_PATH = "/submit";
-const VERIFY_PATH = "/verify-turnstile";
+    <!-- Logo标题区域 -->
+    <div class="header-logo-area">
+        <h1 class="main-title">青云自习室</h1>
+        <div class="en-title">Qingyun Study Room</div>
+        <div class="tagline">自习 | 备考 | 阅读</div>
+    </div>
 
-const submitBtn = document.getElementById("submit-btn");
-submitBtn.addEventListener("click", submitData);
+    <!-- 四大功能入口 -->
+    <div class="func-wrap">
+        <div class="func-row">
+            <div class="func-item">
+                <a href="feedback.html">
+                    <div class="circle-btn">🗨</div>
+                </a>
+                <div class="func-name">意见反馈</div>
+            </div>
+            <div class="func-item">
+                <a href="intro.html">
+                    <div class="circle-btn">📖</div>
+                </a>
+                <div class="func-name">自习室简介</div>
+            </div>
+            <div class="func-item">
+                <a href="rule.html">
+                    <div class="circle-btn">📄</div>
+                </a>
+                <div class="func-name">使用须知</div>
+            </div>
+            <div class="func-item">
+                <a href="contact.html">
+                    <div class="circle-btn">📍</div>
+                </a>
+                <div class="func-name">联系我们</div>
+            </div>
+        </div>
+        <div class="func-desc">自习室预约、意见反馈、服务指南一站式入口</div>
+    </div>
 
-function submitData() {
-    const nameInput = document.getElementById("username");
-    const phoneInput = document.getElementById("phone");
-    const contentInput = document.getElementById("content");
-    const btn = document.getElementById("submit-btn");
-    const tokenInput = document.querySelector('input[name="cf-turnstile-response"]');
+    <!-- 双卡片区域 -->
+    <div class="card-container">
+        <div class="card">
+            <h3>热门服务</h3>
+            <p>智能选座 一键预约<br>超时提醒 贴心服务</p>
+        </div>
+        <div class="card">
+            <h3>最新通知</h3>
+            <p>暑期自习室开放时间调整<br>新增通宵自习区域</p>
+        </div>
+    </div>
 
-    if (!nameInput || !contentInput) {
-        alert("页面表单加载异常，请刷新页面！");
-        return;
-    }
-    if (!tokenInput) {
-        alert("人机验证组件尚未加载完成，请稍候再提交！");
-        return;
-    }
-
-    const name = nameInput.value.trim();
-    const tel = phoneInput.value.trim();
-    const msg = contentInput.value.trim();
-    const captchaToken = tokenInput.value;
-
-    // 表单校验
-    if (!name) {
-        alert("请填写姓名！");
-        return;
-    }
-    if (!msg) {
-        alert("请填写反馈内容！");
-        return;
-    }
-    if (!captchaToken) {
-        alert("请先完成人机验证！");
-        return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = "提交中...";
-
-    // Turnstile验证请求
-    fetch(VERIFY_PATH, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ token: captchaToken })
-    })
-    .then(async res => {
-        if (!res.ok) {
-            // 区分405报错提示，方便你定位问题
-            if(res.status === 405){
-                throw new Error("接口405错误：后端OPTIONS跨域处理未部署成功，请检查functions文件");
-            }
-            throw new Error(`接口请求异常，状态码：${res.status}`);
-        }
-        return res.json();
-    })
-    .then(verifyResult=>{
-        if(!verifyResult.success){
-            throw new Error("人机验证失败，请重新勾选验证");
-        }
-        // 验证通过，提交反馈数据
-        return fetch(API_PATH, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: name,
-                phone: tel,
-                content: msg
-            })
-        })
-    })
-    .then(async res => {
-        if (!res.ok) throw new Error(`提交接口异常，状态码：${res.status}`);
-        return res.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showToast();
-            // 清空表单
-            nameInput.value = "";
-            phoneInput.value = "";
-            contentInput.value = "";
-            // 重置验证码
-            if(window.turnstile){
-                window.turnstile.reset(document.querySelector(".cf-turnstile"));
-            }
-        } else {
-            alert("提交失败：" + (data.msg || "请稍后重试"));
-            resetCaptcha();
-        }
-    })
-    .catch(err => {
-        console.error("请求错误详情：", err);
-        alert(err.message);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.textContent = "提交反馈";
-    });
-}
-
-function resetCaptcha(){
-    if(window.turnstile){
-        window.turnstile.reset(document.querySelector(".cf-turnstile"));
-    }
-}
-
-function showToast() {
-    const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2500);
-}
-</script>
+    <!-- 底部导航 -->
+    <div class="footer-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-text">首页</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📊</div>
+            <div class="nav-text">服务</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">💬</div>
+            <div class="nav-text">消息</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">👤</div>
+            <div class="nav-text">我的</div>
+        </div>
+    </div>
 </body>
 </html>
