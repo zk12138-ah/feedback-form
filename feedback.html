@@ -139,7 +139,7 @@
     </div>
 
 <script>
-// 接口路径（和functions内文件名严格对应，无需修改）
+// 接口路径
 const API_PATH = "/submit";
 const VERIFY_PATH = "/verify-turnstile";
 
@@ -184,17 +184,13 @@ function submitData() {
     btn.disabled = true;
     btn.textContent = "提交中...";
 
-    // Turnstile验证请求
+    // Turnstile验证请求【已移除Content-Type请求头】
     fetch(VERIFY_PATH, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
         body: JSON.stringify({ token: captchaToken })
     })
     .then(async res => {
         if (!res.ok) {
-            // 区分405报错提示，方便你定位问题
             if(res.status === 405){
                 throw new Error("接口405错误：后端OPTIONS跨域处理未部署成功，请检查functions文件");
             }
@@ -206,12 +202,9 @@ function submitData() {
         if(!verifyResult.success){
             throw new Error("人机验证失败，请重新勾选验证");
         }
-        // 验证通过，提交反馈数据
+        // 验证通过，提交反馈数据【已移除Content-Type请求头】
         return fetch(API_PATH, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
             body: JSON.stringify({
                 name: name,
                 phone: tel,
