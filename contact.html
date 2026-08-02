@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>联系我们 | 青云自习室</title>
     <style>
         * {
@@ -28,7 +28,7 @@
         }
         .title-box {
             text-align:center;
-            margin-bottom:24px;
+            margin-bottom:26px;
         }
         .title-box h1{
             color:#1a3480;
@@ -41,35 +41,96 @@
             padding:28px;
             box-shadow:0 2px 12px rgba(0,0,0,0.06);
         }
-        .content-card h3 {
+        .address-title {
+            display:flex;
+            align-items:center;
+            font-size:28px;
             color:#1a3480;
-            margin:22px 0 12px;
-            font-size:20px;
+            margin-bottom:16px;
+            gap:10px;
         }
-        .content-card p {
+        .address-tip {
+            font-size:20px;
+            color:#333;
+            margin-bottom:24px;
+        }
+        /*导航主按钮*/
+        .map-btn {
+            width: 100%;
+            padding:16px;
+            background:#3488eb;
+            color:#fff;
+            border:none;
+            border-radius:14px;
+            font-size:18px;
+            cursor:pointer;
+            transition: transform 0.22s ease, background 0.22s ease;
+        }
+        .map-btn:hover {
+            background:#2777d4;
+            transform: translateY(-2px);
+        }
+        .map-btn:active {
+            transform: scale(0.97);
+        }
+        .div-line {
+            height:1px;
+            background:#e2e8f0;
+            margin:30px 0;
+        }
+        .contact-item {
             font-size:17px;
             line-height:1.8;
             color:#333;
-            margin-bottom:10px;
-        .map-btn {
-    width: 100%;
-    padding:16px;
-    background:#3488eb;
-    color:#fff;
-    border:none;
-    border-radius:14px;
-    font-size:18px;
-    cursor:pointer;
-    transition:0.22s ease;
-    margin-top:12px;
-}
-.map-btn:hover {
-    background:#2777d4;
-    transform: translateY(-2px);
-}
-.map-btn:active {
-    transform: scale(0.97);
-}
+            margin-bottom:12px;
+        }
+
+        /* ========== 地图选择弹窗样式 ========== */
+        .mask-layer {
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.55);
+            display:none;
+            z-index:999;
+            align-items:flex-end;
+            justify-content:center;
+        }
+        .popup-box {
+            width:100%;
+            max-width:600px;
+            background:#fff;
+            border-radius:18px 18px 0 0;
+            overflow:hidden;
+        }
+        .popup-title{
+            text-align:center;
+            padding:20px;
+            font-size:19px;
+            color:#222;
+            border-bottom:1px solid #eee;
+        }
+        .map-item{
+            width:100%;
+            padding:18px;
+            text-align:center;
+            border:none;
+            background:#fff;
+            font-size:18px;
+            cursor:pointer;
+            border-bottom:1px solid #eee;
+        }
+        .map-item:active{
+            background:#f0f4fc;
+        }
+        .cancel-btn{
+            width:100%;
+            padding:18px;
+            text-align:center;
+            border:none;
+            background:#fff;
+            font-size:18px;
+            color:#666;
+            cursor:pointer;
         }
     </style>
 </head>
@@ -81,21 +142,94 @@
         </div>
 
         <div class="content-card">
-           <a href="https://m.amap.com/search/?q=青云自习室" target="_blank">
-    <button class="map-btn">📍 点击导航前往青云自习室</button> </a>
+            <div class="address-title">
+                <span>📍</span>
+                <span>门店地址</span>
+            </div>
+            <div class="address-tip">【百度地图搜索：青云自习室】</div>
 
-            <h3>📞 咨询电话</h3>
-            <p>管理员热线：15912382652 / 15977669068</p>
+            <!--唤起弹窗按钮-->
+            <button class="map-btn" id="openMapPopup">📍 点击一键导航前往</button>
 
-            <h3>💬 线上咨询</h3>
-            <p>微信：jc_qingyun</p>
+            <div class="div-line"></div>
 
-            <h3>⏰ 咨询时段</h3>
-            <p>每日 09:00 — 22:00</p>
-
-            <h3>📝 意见反馈</h3>
-            <p>设施、环境相关建议，可前往首页【意见反馈】提交表单。</p>
+            <div class="contact-item">☎ 咨询电话：【15912382652】</div>
+            <div class="contact-item">⏰ 营业时间：【7：00~23：00】</div>
+            <div class="contact-item">💬 微信客服：【jc_qingyun】</div>
         </div>
     </div>
+
+    <!--地图选择弹窗 -->
+    <div class="mask-layer" id="mask">
+        <div class="popup-box">
+            <div class="popup-title">请选择导航软件</div>
+            <button class="map-item" data-type="baidu">🗺️ 百度地图</button>
+            <button class="map-item" data-type="amap">🚗 高德地图</button>
+            <button class="map-item" data-type="tencent">🌐 腾讯地图</button>
+            <button class="cancel-btn" id="closePopup">取消</button>
+        </div>
+    </div>
+
+<script>
+// ========== 在这里修改自习室完整地址！！ ==========
+const DEST_ADDRESS = "青云自习室";
+// 示例完整版：const DEST_ADDRESS = "青云自习室 玉溪市XX区XX街道XX号";
+
+const mask = document.getElementById('mask');
+const openBtn = document.getElementById('openMapPopup');
+const closeBtn = document.getElementById('closePopup');
+const mapButtons = document.querySelectorAll('.map-item');
+
+//打开弹窗
+openBtn.addEventListener('click',()=>{
+    mask.style.display = 'flex';
+})
+//关闭弹窗
+closeBtn.addEventListener('click',()=>{
+    mask.style.display = 'none';
+})
+
+//点击空白遮罩关闭弹窗
+mask.addEventListener('click',(e)=>{
+    if(e.target === mask){
+        mask.style.display = 'none';
+    }
+})
+
+//跳转导航逻辑
+mapButtons.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        const type = btn.dataset.type;
+        const address = encodeURIComponent(DEST_ADDRESS);
+        let schemeUrl, webUrl;
+
+        switch(type){
+            case "baidu":
+                //唤起百度地图APP
+                schemeUrl = `baidumap://map/search?q=${address}`;
+                webUrl = `https://map.baidu.com/search/?q=${address}`;
+                break;
+            case "amap":
+                //唤起高德地图APP
+                schemeUrl = `amapuri://search/search?keyword=${address}`;
+                webUrl = `https://amap.com/search?keyword=${address}`;
+                break;
+            case "tencent":
+                //唤起腾讯地图APP
+                schemeUrl = `qqmap://map/search?keyword=${address}`;
+                webUrl = `https://map.qq.com/m/search?keyword=${address}`;
+                break;
+        }
+
+        mask.style.display = 'none';
+        //尝试打开APP
+        window.location.href = schemeUrl;
+        //350ms后APP唤起失败，跳转网页版
+        setTimeout(()=>{
+            window.location.href = webUrl;
+        }, 350);
+    })
+})
+</script>
 </body>
 </html>
