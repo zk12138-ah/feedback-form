@@ -84,6 +84,79 @@
   .seat-tooltip .label { color: #94a3b8; margin-right: 6px; }
 </style>
 
+<style>
+  .hot-service {
+    max-width: 720px;
+    margin: 0 auto 32px;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 80, 180, 0.08);
+  }
+  .hot-service h3 {
+    color: #1a4b94;
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+  .service-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .service-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #2b6bcd;
+  }
+  .service-item .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e0f2fe;
+    color: #0369a1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .service-item .text h4 {
+    color: #1a4b94;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .service-item .text p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+  }
+</style>
+
+<div class="hot-service">
+  <h3>热门服务</h3>
+  <div class="service-list">
+    <div class="service-item">
+      <div class="icon">座</div>
+      <div class="text">
+        <h4>智能选座 一键预约（线上预约功能正在开发中，敬请期待！！）</h4>
+        <p>请联系管理员预约座位（电话：15912382652/微信号：jc_qingyun）</p>
+      </div>
+    </div>
+    <div class="service-item">
+      <div class="icon">铃</div>
+      <div class="text">
+        <h4>超时提醒 贴心服务（暂未上线！！！敬请期待！！！）</h4>
+        <p>座位使用即将到期自动提醒，避免超时占用</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="seat-map-section">
   <h3>自习室座位实时状态</h3>
   <div class="seat-summary">
