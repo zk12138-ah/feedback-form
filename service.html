@@ -291,15 +291,31 @@ async function loadSeatMap() {
             }
             tipEl.innerHTML = html;
 
-            let tipX = e.clientX + 12;
-            let tipY = e.clientY + 12;
-            const tipRect = tipEl.getBoundingClientRect();
-            if (tipX + tipRect.width > window.innerWidth) {
-              tipX = e.clientX - tipRect.width - 12;
-            }
-            if (tipY + tipRect.height > window.innerHeight) {
-              tipY = e.clientY - tipRect.height - 12;
-            }
+let offsetX = 12;
+let offsetY = 12;
+let tipX = e.clientX + offsetX;
+let tipY = e.clientY + offsetY;
+
+// 先临时渲染获取弹窗尺寸
+tipEl.style.left = "-9999px";
+tipEl.style.top = "-9999px";
+tipEl.classList.add("active");
+const tipRect = tipEl.getBoundingClientRect();
+
+// 横向边界判断
+if (tipX + tipRect.width > window.innerWidth) {
+    tipX = e.clientX - tipRect.width - offsetX;
+}
+
+// 纵向智能判断：下半屏幕 → 弹窗向上，避免遮挡座位
+if (e.clientY > window.innerHeight / 2) {
+    tipY = e.clientY - tipRect.height - offsetY;
+} else {
+    tipY = e.clientY + offsetY;
+}
+
+tipEl.style.left = tipX + "px";
+tipEl.style.top = tipY + "px";
 
             tipEl.style.left = tipX + "px";
             tipEl.style.top = tipY + "px";
