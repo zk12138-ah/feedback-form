@@ -17,7 +17,10 @@ export async function onRequest(context) {
     const realPwd = env.ADMIN_PASSWORD;
 
     if (!inputPwd || inputPwd !== realPwd) {
-      return Response.json({ success: false, errMsg: "权限验证失败" }, { status: 403, headers: corsHeaders });
+      return Response.json(
+        { success: false, errMsg: "权限验证失败" },
+        { status: 403, headers: corsHeaders }
+      );
     }
 
     const SUPABASE_URL = env.SUPABASE_URL;
@@ -54,6 +57,9 @@ export async function onRequest(context) {
     }, { headers: corsHeaders });
 
   } catch (err) {
-    return Response.json({ success: false, errMsg: err.message }, { status: 500, headers: corsHeaders });
+    return Response.json(
+      { success: false, errMsg: err.message },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
