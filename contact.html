@@ -8,6 +8,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>找到我们 | 青云自习室</title>
     <style>
+        
+    .social-section {
+    max-width: 820px;
+    margin: 40px auto;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 80, 180, 0.08);
+}
+.social-section h3 {
+    color: #1a4b94;
+    font-size: 22px;
+    margin-bottom: 24px;
+}
+.social-card-wrap {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.social-card {
+    width: 220px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-align: center;
+    border-left: 4px solid #2b6bcd;
+    transition: transform 0.2s ease;
+}
+.social-card:hover {
+    transform: translateY(-4px);
+}
+.social-card img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.social-card .platform-name {
+    font-size: 16px;
+    color: #1a4b94;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+.social-card .account-id {
+    font-size: 14px;
+    color: #64748b;
+}
+
+         
+        
         * {
             margin: 0;
             padding: 0;
@@ -275,9 +327,39 @@ mapButtons.forEach(btn=>{
     })
 })
 </script>
+
+    <div class="social-section">
+    <h3>官方社交账号</h3>
+    <div class="social-card-wrap">
+        <!-- 抖音主账号 -->
+        <div class="social-card">
+            <img src="douyin_main_qrcode.png" alt="青云自习室抖音主账号二维码">
+            <div class="platform-name">🎵 抖音（主账号）</div>
+            <div class="account-id">账号ID：qingyun_zx</div>
+        </div>
+        <!-- 抖音小号，不需要直接删除整块 -->
+        <div class="social-card">
+            <img src="douyin_sub_qrcode.png" alt="自习室日常抖音账号二维码">
+            <div class="platform-name">🎵 抖音（日常号）</div>
+            <div class="account-id">账号ID：qingyun_daily</div>
+        </div>
+        <!-- 小红书账号 -->
+        <div class="social-card">
+            <img src="xiaohongshu_qrcode.png" alt="青云自习室小红书二维码">
+            <div class="platform-name">📕 小红书</div>
+            <div class="account-id">账号ID：青云自习室</div>
+        </div>
+    </div>
+    <p style="text-align:center;color:#64748b;font-size:13px;margin-top:20px;">
+        打开对应APP，扫描上方二维码进入主页，搜索账号名称关注
+    </p>
+</div>
+    
     <div class="copyright" style="text-align:center;color:#666;font-size:13px;padding:20px 10px;">
     © 2026 青云自习室 保留所有权利
     <p style="margin-top:6px;">网站原创内容著作权归本站所有；第三方服务、商标产权归属对应服务商。</p>
-</div>
+    </div>
+
+    
 </body>
 </html>
