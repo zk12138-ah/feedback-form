@@ -5,7 +5,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>青云自习室 - 座位实时查询</title>
 <style>
@@ -30,7 +29,6 @@
     font-size: 22px;
     margin-bottom: 8px;
   }
-  /* ==========新增预约提示文字样式【和h3完全统一】========== */
   .seat-notice{
     text-align:center;
     color:#1a4b94;
@@ -45,7 +43,6 @@
   .tel-link:active,.wx-copy:active{
     opacity:0.65;
   }
-  /* 复制成功弹窗 */
   .copy-toast{
     position:fixed;
     top:45%;
@@ -88,12 +85,10 @@
   }
     .seat {
     cursor: pointer;
-    /* 延长过渡时间，更加顺滑 */
     transition: transform 0.22s ease-out, opacity 0.2s ease;
     transform-origin: center center;
   }
   .seat:hover {
-    /* 缩小放大幅度，不突兀 */
     transform: scale(1.035);
   }
   .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 2; }
@@ -130,7 +125,6 @@
     line-height: 1.6;
     pointer-events: none;
     z-index: 999;
-    /* 增加淡入淡出 */
     opacity: 0;
     transition: opacity 0.18s ease;
     white-space: nowrap;
@@ -225,36 +219,22 @@
     <div><strong id="occupiedSeat">0</strong>已占用</div>
   </div>
 
-  <!-- 预约联系文字（样式和上方标题保持一致） -->
   <p class="seat-notice">如需预约请联系管理员（电话：<a href="tel:15912382652" class="tel-link">15912382652</a>/微信：<span class="wx-copy" data-wx="jc_qingyun">jc_qingyun</span>）</p>
 
   <div class="seat-map-wrap">
    <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- 整体外框 -->
   <rect x="20" y="20" width="760" height="560" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-
-  <!-- 顶部窗户 -->
   <rect x="20" y="20" width="760" height="40" fill="#e0f2fe" stroke="#94a3b8" stroke-width="1"/>
   <text x="400" y="46" text-anchor="middle" font-size="18" fill="#0369a1">窗户</text>
-
-  <!-- 自习区与大厅分隔【向下移动】 -->
   <line x1="20" y1="340" x2="780" y2="340" stroke="#cbd5e1" stroke-width="2"/>
-  
-  <!-- A/B区分隔（B区更窄） -->
   <line x1="480" y1="60" x2="480" y2="340" stroke="#cbd5e1" stroke-width="2"/>
   <text x="250" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">A 区</text>
   <text x="610" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">B 区</text>
-
-  <!-- 大厅 -->
   <text x="400" y="470" text-anchor="middle" font-size="48" fill="#e2e8f0" font-weight="bold">大 厅</text>
-
-  <!-- 两个门，下移对齐横线，右门右移 -->
   <rect x="400" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
   <text x="440" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
   <rect x="480" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
   <text x="520" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
-
-  <!-- 座位由JS动态生成 -->
 </svg>
   </div>
 
@@ -294,9 +274,6 @@ async function loadSeatMap() {
         g.setAttribute("class", "seat-group");
         g.setAttribute("data-seat", seat.seat_no);
         g.setAttribute("data-status", seat.status);
-        g.setAttribute("data-customer", seat.customer_id || "");
-        g.setAttribute("data-start", seat.occupy_start ? new Date(seat.occupy_start).toLocaleDateString() : "");
-        g.setAttribute("data-end", seat.occupy_end ? new Date(seat.occupy_end).toLocaleDateString() : "");
 
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", seat.pos_x);
@@ -314,7 +291,7 @@ async function loadSeatMap() {
         text.setAttribute("font-size", "14");
         text.setAttribute("fill", "#ffffff");
         text.setAttribute("pointer-events", "none");
-        text.setAttribute("font-weight", "500");
+        text.setAttribute("font-weight", "50");
         text.textContent = seat.seat_no;
         g.appendChild(text);
 
@@ -332,37 +309,34 @@ async function loadSeatMap() {
 
             let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
                         <div><span class="label">状态：</span>${statusText}</div>`;
-            // 只判断时间，不再读取客户编号
+            
+            // 已占用座位显示占用时段
             if (seat.status === "occupied" && seat.occupy_start && seat.occupy_end) {
               html += `<div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
             }
             tipEl.innerHTML = html;
 
-let offsetX = 12;
-let offsetY = 12;
-let tipX = e.clientX + offsetX;
-let tipY = e.clientY + offsetY;
+            const offsetX = 12;
+            const offsetY = 12;
+            let tipX = e.clientX + offsetX;
+            let tipY = e.clientY + offsetY;
 
-// 先临时渲染获取弹窗尺寸
-tipEl.style.left = "-9999px";
-tipEl.style.top = "-9999px";
-tipEl.classList.add("active");
-const tipRect = tipEl.getBoundingClientRect();
+            // 临时渲染获取弹窗尺寸
+            tipEl.style.left = "-9999px";
+            tipEl.style.top = "-9999px";
+            const tipRect = tipEl.getBoundingClientRect();
 
-// 横向边界判断
-if (tipX + tipRect.width > window.innerWidth) {
-    tipX = e.clientX - tipRect.width - offsetX;
-}
+            // 横向边界判断
+            if (tipX + tipRect.width > window.innerWidth) {
+                tipX = e.clientX - tipRect.width - offsetX;
+            }
 
-// 纵向智能判断：下半屏幕 → 弹窗向上，避免遮挡座位
-if (e.clientY > window.innerHeight / 2) {
-    tipY = e.clientY - tipRect.height - offsetY;
-} else {
-    tipY = e.clientY + offsetY;
-}
-
-tipEl.style.left = tipX + "px";
-tipEl.style.top = tipY + "px";
+            // 纵向智能判断
+            if (e.clientY > window.innerHeight / 2) {
+                tipY = e.clientY - tipRect.height - offsetY;
+            } else {
+                tipY = e.clientY + offsetY;
+            }
 
             tipEl.style.left = tipX + "px";
             tipEl.style.top = tipY + "px";
@@ -389,7 +363,6 @@ tipEl.style.top = tipY + "px";
 
   loadSeatMap();
 
-  // 30秒自动刷新
   const refreshTimer = setInterval(loadSeatMap, 30000);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -400,11 +373,9 @@ tipEl.style.top = tipY + "px";
   });
 </script>
 
-<!-- 微信号复制功能JS -->
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
     const wxEl = document.querySelector('.wx-copy');
-    // 创建弹窗
     const toast = document.createElement('div');
     toast.className = "copy-toast";
     toast.innerText = "微信号已复制！前往微信粘贴";
@@ -415,7 +386,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         try{
             await navigator.clipboard.writeText(wxNum);
         }catch{
-            // 兼容老旧浏览器
             const tempInput = document.createElement("input");
             tempInput.value = wxNum;
             document.body.appendChild(tempInput);
