@@ -310,7 +310,9 @@ mapButtons.forEach(btn=>{
                 webUrl = `https://map.baidu.com/search/?q=${address}`;
                 break;
             case "amap":
-                schemeUrl = `amapuri://search/search?keyword=${address}`;
+                //【修复】修正高德Scheme，删除多余search路径
+                schemeUrl = `amapuri://search?keyword=${address}`;
+                //高德官网网页搜索正确链接
                 webUrl = `https://amap.com/search?keyword=${address}`;
                 break;
             case "tencent":
@@ -320,10 +322,19 @@ mapButtons.forEach(btn=>{
         }
 
         mask.style.display = 'none';
-        window.location.href = schemeUrl;
-        setTimeout(()=>{
-            window.location.href = webUrl;
-        }, 350);
+
+        // 判断设备：PC端直接打开网页；移动端尝试唤起APP
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if(isMobile){
+            window.location.href = schemeUrl;
+            // 延迟跳转网页兜底（APP唤起失败时执行）
+            setTimeout(()=>{
+                window.location.href = webUrl;
+            }, 450);
+        }else{
+            //电脑端，直接打开网页地图，不尝试唤起APP（电脑没有地图APP，避免空白失败）
+            window.open(webUrl,"_blank");
+        }
     })
 })
 </script>
