@@ -7,7 +7,6 @@ export async function onRequest(context) {
     "Access-Control-Allow-Headers": "Content-Type"
   };
 
-  // 处理预检请求
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -20,37 +19,55 @@ export async function onRequest(context) {
   }
 
   try {
-    const { seat_no, status, password } = await request.json();
+    const body = await request.json();
+    const { seat_no, status, password, customer_id, occupy_start, occupy_end } = body;
 
     // 校验管理员密码
     const adminPwd = env.ADMIN_PASSWORD;
     if (!adminPwd || password !== adminPwd) {
       return Response.json(
-        { success: false, errMsg: "管理员密码错误，无权修改座位状态" },
+        { success: false, errMsg: "管理员密码错误" },
         { headers: corsHeaders, status: 403 }
       );
     }
 
-    // 校验参数
-    if (!seat_no || !status) {
+    if (!seat_no) {
       return Response.json(
-        { success: false, errMsg: "缺少座位编号或状态参数" },
-        { headers: corsHeaders, status: 400 }
-      );
-    }
-
-    const allowedStatus = ["available", "occupied", "maintenance"];
-    if (!allowedStatus.includes(status)) {
-      return Response.json(
-        { success: false, errMsg: "状态值不合法" },
+        { success: false, errMsg: "缺少座位编号" },
         { headers: corsHeaders, status: 400 }
       );
     }
 
     const baseUrl = env.SUPABASE_URL.replace(/\/+$/, "");
     const serviceKey = env.SUPABASE_SERVICE_KEY;
+    const updateData = { updated_at: new Date().toISOString() };
 
-    // 调用 Supabase 更新座位状态
+    // 模式1：直接设置状态
+    if (status) {
+      const allowed = ["available", "occupied", "maintenance"];
+      if (!allowed.includes(status)) {
+        return Response.json(
+          { success: false, errMsg: "状态值不合法" },
+          { headers: corsHeaders, status: 400 }
+        );
+      }
+      updateData.status = status;
+      // 设为可选时清空占用信息
+      if (status === "available") {
+        updateData.customer_id = null;
+        updateData.occupy_start = null;
+        updateData.occupy_end = null;
+      }
+    }
+
+    // 模式2：设置占用信息，自动变为已占用
+    if (customer_id && occupy_start && occupy_end) {
+      updateData.status = "occupied";
+      updateData.customer_id = customer_id;
+      updateData.occupy_start = occupy_start;
+      updateData.occupy_end = occupy_end;
+    }
+
     const apiUrl = `${baseUrl}/rest/v1/seats?seat_no=eq.${encodeURIComponent(seat_no)}`;
     const res = await fetch(apiUrl, {
       method: "PATCH",
@@ -60,10 +77,7 @@ export async function onRequest(context) {
         "Content-Type": "application/json",
         "Prefer": "return=minimal"
       },
-      body: JSON.stringify({
-        status,
-        updated_at: new Date().toISOString()
-      })
+      body: JSON.stringify(updateData)
     });
 
     if (!res.ok) {
