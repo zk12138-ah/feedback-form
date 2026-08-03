@@ -25,7 +25,7 @@ export async function onRequest(context) {
     console.log("SUPABASE_URL是否加载:", !!SUPABASE_URL);
     console.log("SUPABASE_ANON_KEY是否加载:", !!SUPABASE_ANON_KEY);
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/seat?select=*`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/seats?select=*`, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`
