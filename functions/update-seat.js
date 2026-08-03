@@ -35,8 +35,8 @@ export async function onRequest(context) {
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
 
-    // 更新seat表指定座位状态
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/seat?seat_no=eq.${encodeURIComponent(seat_no)}`, {
+    // ⚠️这里已经修改为 seats（复数）
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/seats?seat_no=eq.${encodeURIComponent(seat_no)}`, {
       method: "PATCH",
       headers: {
         apikey: SUPABASE_ANON_KEY,
