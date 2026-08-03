@@ -19,13 +19,11 @@ export async function onRequest(context) {
   }
 
   try {
-    // ========== 新增：管理员密码校验 ==========
     const url = new URL(request.url);
     const inputPwd = url.searchParams.get("password");
     const realPwd = env.ADMIN_PASSWORD;
     const isAdmin = inputPwd && inputPwd === realPwd;
 
-    // 传了密码但密码错误，直接返回权限失败
     if (inputPwd && !isAdmin) {
       return Response.json(
         { success: false, errMsg: "权限验证失败" },
@@ -58,7 +56,6 @@ export async function onRequest(context) {
     const available = data.filter(s => s.status === "available").length;
     const occupied = data.filter(s => s.status === "occupied").length;
 
-    // ========== 双模式返回 ==========
     if (isAdmin) {
       // 管理员：返回完整全部数据
       return Response.json(
@@ -66,13 +63,15 @@ export async function onRequest(context) {
         { headers: corsHeaders }
       );
     } else {
-      // 公开用户：仅返回座位公开字段，脱敏敏感信息
+      // 公开用户：新增返回占用时间，隐藏客户编号等敏感信息
       const publicList = data.map(item => ({
         seat_no: item.seat_no,
         status: item.status,
         pos_x: item.pos_x,
         pos_y: item.pos_y,
-        area: item.area
+        area: item.area,
+        occupy_start: item.occupy_start,
+        occupy_end: item.occupy_end
       }));
       return Response.json(
         { success: true, total, available, occupied, list: publicList },
