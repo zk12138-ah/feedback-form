@@ -21,7 +21,8 @@ export async function onRequest(context) {
   }
 
   try {
-    const { password, seat_no, status } = await request.json();
+    // 新增 customer_id、occupy_start、occupy_end 接收
+    const { password, seat_no, status, customer_id, occupy_start, occupy_end } = await request.json();
     const adminPwd = env.ADMIN_PASSWORD;
 
     // 管理员密码校验
@@ -35,7 +36,12 @@ export async function onRequest(context) {
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
 
-    // ⚠️这里已经修改为 seats（复数）
+    // 动态组装更新内容
+    const updatePayload = { status };
+    if (customer_id !== undefined) updatePayload.customer_id = customer_id;
+    if (occupy_start !== undefined) updatePayload.occupy_start = occupy_start;
+    if (occupy_end !== undefined) updatePayload.occupy_end = occupy_end;
+
     const res = await fetch(`${SUPABASE_URL}/rest/v1/seats?seat_no=eq.${encodeURIComponent(seat_no)}`, {
       method: "PATCH",
       headers: {
@@ -44,7 +50,7 @@ export async function onRequest(context) {
         "Content-Type": "application/json",
         "Prefer": "return=representation"
       },
-      body: JSON.stringify({ status })
+      body: JSON.stringify(updatePayload)
     });
 
     const result = await res.json();
