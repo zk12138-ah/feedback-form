@@ -1,90 +1,6 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>热门服务 | 青云自习室</title>
-   
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
-        }
-        body {
-            background-color: #f8fafe;
-            padding: 30px 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .back-btn {
-            display: inline-block;
-            text-decoration: none;
-            color:#1a3480;
-            font-size:16px;
-            margin-bottom:24px;
-        }
-        .title-box {
-            text-align:center;
-            margin-bottom:24px;
-        }
-        .title-box h1{
-            color:#1a3480;
-            font-size:32px;
-            letter-spacing:2px;
-        }
-        .content-card {
-            background:#ffffff;
-            border-radius:16px;
-            padding:28px;
-            box-shadow:0 2px 12px rgba(0,0,0,0.06);
-        }
-        .content-card h3 {
-            color:#1a3480;
-            margin:22px 0 12px;
-            font-size:20px;
-        }
-        .content-card p {
-            font-size:17px;
-            line-height:1.8;
-            color:#333;
-            margin-bottom:10px;
-        }
-        .content-card ul{
-            padding-left:22px;
-            margin-bottom:14px;
-        }
-        .content-card li{
-            font-size:16px;
-            line-height:1.75;
-            color:#333;
-            margin-bottom:8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="./index.html" class="back-btn">← 返回首页</a>
-        <div class="title-box">
-            <h1>热门服务介绍</h1>
-        </div>
-
-        <div class="content-card">
-            <h3>📌 座位预约(线上预约功能开发中，敬请期待！！)</h3>
-            <ul>
-                <li>请直接联系管理员预约。（微信号：jc_qingyun）</li>                
-            </ul>
-
-
-            <h3>💡 温馨提示</h3>
-            <p>离开后请随手关灯关门，谢谢配合！</p>
-
-            <style>
+<style>
   .seat-map-section {
-    max-width: 720px;
+    max-width: 820px;
     margin: 40px auto;
     padding: 32px;
     background: #ffffff;
@@ -110,10 +26,10 @@
   }
   .seat-map-wrap {
     width: 100%;
-    overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     background: #f8fafc;
+    overflow: hidden;
   }
   #seatMap {
     width: 100%;
@@ -122,23 +38,15 @@
   }
   .seat {
     cursor: default;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.15s;
   }
-  .seat-available {
-    fill: #22c55e;
-    stroke: #16a34a;
-    stroke-width: 1.5;
+  .seat:hover {
+    transform: scale(1.05);
   }
-  .seat-occupied {
-    fill: #ef4444;
-    stroke: #dc2626;
-    stroke-width: 1.5;
-  }
-  .seat-maintenance {
-    fill: #94a3b8;
-    stroke: #64748b;
-    stroke-width: 1.5;
-  }
+  .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 2; }
+  .seat-occupied { fill: #ef4444; stroke: #dc2626; stroke-width: 2; }
+  .seat-maintenance { fill: #94a3b8; stroke: #64748b; stroke-width: 2; }
+
   .seat-legend {
     display: flex;
     gap: 24px;
@@ -158,10 +66,22 @@
   .dot.available { background: #22c55e; }
   .dot.occupied { background: #ef4444; }
   .dot.maintenance { background: #94a3b8; }
-  .room-label {
+
+  .seat-tooltip {
+    position: fixed;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
     font-size: 13px;
-    fill: #64748b;
+    line-height: 1.6;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+    white-space: nowrap;
   }
+  .seat-tooltip.active { display: block; }
+  .seat-tooltip .label { color: #94a3b8; margin-right: 6px; }
 </style>
 
 <div class="seat-map-section">
@@ -173,15 +93,31 @@
   </div>
 
   <div class="seat-map-wrap">
-    <svg id="seatMap" viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg">
-      <!-- 自习室外框 -->
-      <rect x="20" y="20" width="410" height="260" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-      <!-- 过道 -->
-      <rect x="200" y="20" width="50" height="260" fill="#f1f5f9"/>
-      <text x="225" y="155" class="room-label" text-anchor="middle">过道</text>
-      <!-- 区域标签 -->
-      <text x="110" y="55" class="room-label" text-anchor="middle">A 区</text>
-      <text x="340" y="55" class="room-label" text-anchor="middle">B 区</text>
+    <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+      <!-- 整体外框 -->
+      <rect x="20" y="20" width="760" height="560" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+
+      <!-- 顶部窗户 -->
+      <rect x="20" y="20" width="760" height="40" fill="#e0f2fe" stroke="#94a3b8" stroke-width="1"/>
+      <text x="400" y="46" text-anchor="middle" font-size="18" fill="#0369a1">窗户</text>
+
+      <!-- 自习区与大厅分隔 -->
+      <line x1="20" y1="320" x2="780" y2="320" stroke="#cbd5e1" stroke-width="2"/>
+      
+      <!-- A/B区分隔（B区更窄） -->
+      <line x1="480" y1="60" x2="480" y2="320" stroke="#cbd5e1" stroke-width="2"/>
+      <text x="250" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">A 区</text>
+      <text x="610" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">B 区</text>
+
+      <!-- 大厅 -->
+      <text x="400" y="470" text-anchor="middle" font-size="48" fill="#e2e8f0" font-weight="bold">大 厅</text>
+
+      <!-- 两个门 -->
+      <rect x="260" y="300" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+      <text x="300" y="315" text-anchor="middle" font-size="14" fill="#475569">门</text>
+      <rect x="460" y="300" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+      <text x="500" y="315" text-anchor="middle" font-size="14" fill="#475569">门</text>
+
       <!-- 座位由JS动态生成 -->
     </svg>
   </div>
@@ -193,67 +129,103 @@
   </div>
 </div>
 
+<div class="seat-tooltip" id="seatTip"></div>
+
 <script>
-async function loadSeatMap() {
-  const svg = document.getElementById("seatMap");
-  const totalEl = document.getElementById("totalSeat");
-  const availableEl = document.getElementById("availableSeat");
-  const occupiedEl = document.getElementById("occupiedSeat");
+  async function loadSeatMap() {
+    const svg = document.getElementById("seatMap");
+    const totalEl = document.getElementById("totalSeat");
+    const availableEl = document.getElementById("availableSeat");
+    const occupiedEl = document.getElementById("occupiedSeat");
+    const tipEl = document.getElementById("seatTip");
 
-  try {
-    const res = await fetch("/seats");
-    const result = await res.json();
+    try {
+      const res = await fetch("/seats");
+      const result = await res.json();
+      if (!result.success) throw new Error(result.errMsg);
 
-    if (!result.success) {
-      throw new Error(result.errMsg || "加载失败");
+      totalEl.textContent = result.total;
+      availableEl.textContent = result.available;
+      occupiedEl.textContent = result.occupied;
+
+      // 清空旧座位
+      svg.querySelectorAll(".seat-group").forEach(el => el.remove());
+
+      result.list.forEach(seat => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "seat-group");
+        g.setAttribute("data-seat", seat.seat_no);
+        g.setAttribute("data-status", seat.status);
+        g.setAttribute("data-customer", seat.customer_id || "");
+        g.setAttribute("data-start", seat.occupy_start ? new Date(seat.occupy_start).toLocaleDateString() : "");
+        g.setAttribute("data-end", seat.occupy_end ? new Date(seat.occupy_end).toLocaleDateString() : "");
+
+        // 座位方块
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", seat.pos_x);
+        rect.setAttribute("y", seat.pos_y);
+        rect.setAttribute("width", "50");
+        rect.setAttribute("height", "60");
+        rect.setAttribute("rx", "4");
+        rect.setAttribute("class", `seat seat-${seat.status}`);
+        g.appendChild(rect);
+
+        // 座位编号
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", seat.pos_x + 25);
+        text.setAttribute("y", seat.pos_y + 36);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "14");
+        text.setAttribute("fill", "#ffffff");
+        text.setAttribute("pointer-events", "none");
+        text.setAttribute("font-weight", "500");
+        text.textContent = seat.seat_no;
+        g.appendChild(text);
+
+        // hover显示提示
+        g.addEventListener("mousemove", e => {
+          const statusText = {
+            available: "可选",
+            occupied: "已占用",
+            maintenance: "维护中"
+          }[seat.status] || seat.status;
+
+          let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
+                      <div><span class="label">状态：</span>${statusText}</div>`;
+          if (seat.status === "occupied" && seat.customer_id) {
+            html += `<div><span class="label">客户编号：</span>${seat.customer_id}</div>
+                     <div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
+          }
+          tipEl.innerHTML = html;
+          tipEl.style.left = e.clientX + 12 + "px";
+          tipEl.style.top = e.clientY + 12 + "px";
+          tipEl.classList.add("active");
+        });
+        g.addEventListener("mouseleave", () => {
+          tipEl.classList.remove("active");
+        });
+
+        svg.appendChild(g);
+      });
+
+    } catch (err) {
+      console.error("座位图加载失败:", err);
+      totalEl.textContent = "-";
+      availableEl.textContent = "-";
+      occupiedEl.textContent = "-";
     }
-
-    // 更新统计数字
-    totalEl.textContent = result.total;
-    availableEl.textContent = result.available;
-    occupiedEl.textContent = result.occupied;
-
-    // 清空旧座位
-    const oldSeats = svg.querySelectorAll(".seat");
-    oldSeats.forEach(el => el.remove());
-
-    // 动态生成座位
-    result.list.forEach(seat => {
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", seat.pos_x);
-      rect.setAttribute("y", seat.pos_y);
-      rect.setAttribute("width", "36");
-      rect.setAttribute("height", "48");
-      rect.setAttribute("rx", "4");
-      rect.setAttribute("class", `seat seat-${seat.status}`);
-      rect.setAttribute("data-seat", seat.seat_no);
-      rect.setAttribute("title", seat.seat_no);
-      svg.appendChild(rect);
-
-      // 座位编号文字
-      const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", seat.pos_x + 18);
-      text.setAttribute("y", seat.pos_y + 29);
-      text.setAttribute("text-anchor", "middle");
-      text.setAttribute("font-size", "11");
-      text.setAttribute("fill", "#ffffff");
-      text.setAttribute("pointer-events", "none");
-      text.textContent = seat.seat_no.split("-")[1];
-      svg.appendChild(text);
-    });
-
-  } catch (err) {
-    console.error("座位图加载失败:", err);
-    totalEl.textContent = "-";
-    availableEl.textContent = "-";
-    occupiedEl.textContent = "-";
   }
-}
 
-// 页面加载时渲染
-loadSeatMap();
+  loadSeatMap();
+
+  // 每30秒自动刷新
+  const refreshTimer = setInterval(loadSeatMap, 30000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      clearInterval(refreshTimer);
+    } else {
+      loadSeatMap();
+      setInterval(loadSeatMap, 30000);
+    }
+  });
 </script>
-        </div>
-    </div>
-</body>
-</html>
