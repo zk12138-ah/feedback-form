@@ -36,12 +36,15 @@
     height: auto;
     display: block;
   }
-  .seat {
-    cursor: default;
-    transition: opacity 0.2s, transform 0.15s;
+    .seat {
+    cursor: pointer;
+    /* 延长过渡时间，更加顺滑 */
+    transition: transform 0.22s ease-out, opacity 0.2s ease;
+    transform-origin: center center;
   }
   .seat:hover {
-    transform: scale(1.05);
+    /* 缩小放大幅度，不突兀 */
+    transform: scale(1.035);
   }
   .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 2; }
   .seat-occupied { fill: #ef4444; stroke: #dc2626; stroke-width: 2; }
