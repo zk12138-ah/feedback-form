@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
     <title>座位管理后台 - 青云自习室</title>
     <style>
         * {
@@ -13,21 +13,22 @@
         }
         body {
             background: #f0f7ff;
-            padding: 40px 20px;
+            padding: 20px 12px;
             min-height: 100vh;
         }
         .container {
             max-width: 820px;
             margin: 0 auto;
             background: #fff;
-            padding: 36px;
+            padding: 20px 16px;
             border-radius: 16px;
             box-shadow: 0 4px 18px rgba(0, 80, 180, 0.08);
         }
         h2 {
             color: #1a4b94;
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            font-size: 22px;
         }
         .login-box {
             max-width: 360px;
@@ -35,17 +36,17 @@
         }
         .login-box input {
             width: 100%;
-            padding: 12px 14px;
+            padding: 14px 14px;
             border: 1px solid #d0e0f5;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 16px;
             margin-bottom: 16px;
             outline: none;
         }
         .login-box input:focus { border-color: #3678d3; }
         .btn {
             width: 100%;
-            padding: 13px;
+            padding: 14px;
             background: #2b6bcd;
             color: #fff;
             border: none;
@@ -62,10 +63,11 @@
 
         .seat-summary {
             display: flex;
-            gap: 24px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 16px;
             color: #555;
             font-size: 15px;
+            flex-wrap: wrap;
         }
         .seat-summary strong {
             color: #1a4b94;
@@ -76,10 +78,12 @@
             border: 1px solid #e2e8f0;
             border-radius: 12px;
             background: #f8fafc;
-            overflow: hidden;
+            overflow-x: auto;
+            touch-action: manipulation;
         }
         #seatMap {
             width: 100%;
+            min-width: 600px;
             height: auto;
             display: block;
         }
@@ -97,11 +101,12 @@
 
         .seat-legend {
             display: flex;
-            gap: 24px;
+            gap: 16px;
             margin-top: 16px;
             font-size: 14px;
             color: #475569;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .seat-legend .dot {
             display: inline-block;
@@ -137,6 +142,12 @@
             background: #e2e8f0;
             margin: 6px 0;
         }
+        /* 移动端隐藏桌面右键菜单 */
+        @media (max-width:640px){
+            .status-menu{
+                display:none !important;
+            }
+        }
 
         /* 占用设置弹窗 */
         .occupy-modal {
@@ -152,9 +163,10 @@
         .occupy-modal.active { display: flex; }
         .modal-box {
             background: #fff;
-            padding: 28px;
+            padding: 24px 20px;
             border-radius: 12px;
-            width: 360px;
+            width: 92%;
+            max-width: 360px;
         }
         .modal-box h4 {
             color: #1a4b94;
@@ -170,10 +182,10 @@
         }
         .modal-box input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 12px;
             border: 1px solid #d0e0f5;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             outline: none;
         }
         .modal-box input:focus { border-color: #3678d3; }
@@ -184,21 +196,23 @@
         }
         .modal-btns .btn-cancel {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             background: #f1f5f9;
             color: #475569;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size:16px;
         }
         .modal-btns .btn-confirm {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             background: #2b6bcd;
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-size:16px;
         }
 
         .tip {
@@ -223,26 +237,61 @@
         }
         .toast.show { opacity: 1; }
 
-        /* 悬浮提示框 */
-        .seat-tooltip {
-            position: fixed;
-            background: rgba(15, 23, 42, 0.92);
-            color: #fff;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.6;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.18s ease;
-            white-space: nowrap;
+        /* ========== 移动端底部抽屉 新增 ========== */
+        .drawer-mask{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.4);
+            z-index:998;
+            display:none;
         }
-        .seat-tooltip.active {
-            display: block;
-            opacity: 1;
+        .drawer-mask.show{
+            display:block;
         }
-        .seat-tooltip .label { color: #94a3b8; margin-right: 6px; }
+        .drawer-box{
+            position:fixed;
+            left:0;
+            bottom:0;
+            width:100%;
+            max-width:820px;
+            margin:0 auto;
+            background:#fff;
+            border-radius:16px 16px 0 0;
+            padding:24px 20px 32px;
+            z-index:999;
+            transform:translateY(100%);
+            transition:transform 0.25s ease;
+        }
+        .drawer-mask.show .drawer-box{
+            transform:translateY(0);
+        }
+        .drawer-handle{
+            width:40px;
+            height:4px;
+            background:#ddd;
+            border-radius:99px;
+            margin:0 auto 16px;
+        }
+        .drawer-info{
+            line-height:1.8;
+            font-size:15px;
+            margin-bottom:20px;
+        }
+        .drawer-btn-group{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
+        .drawer-btn{
+            padding:13px;
+            border-radius:10px;
+            border:none;
+            font-size:15px;
+            cursor:pointer;
+        }
+        .btn-opt1{background:#22c55e;color:#fff;}
+        .btn-opt2{background:#94a3b8;color:#fff;}
+        .btn-opt3{grid-column:1/-1;background:#2b6bcd;color:#fff;}
     </style>
 </head>
 <body>
@@ -260,32 +309,27 @@
                 <div><strong id="availableSeat">0</strong>剩余可选</div>
                 <div><strong id="occupiedSeat">0</strong>已占用</div>
             </div>
-
-            <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-                <!-- 整体外框 -->
-                <rect x="20" y="20" width="760" height="560" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-
-                <!-- 顶部窗户 -->
-                <rect x="20" y="20" width="760" height="40" fill="#e0f2fe" stroke="#94a3b8" stroke-width="1"/>
-                <text x="400" y="46" text-anchor="middle" font-size="18" fill="#0369a1">窗户</text>
-
-                <!-- 自习区与大厅分隔 -->
-                <line x1="20" y1="340" x2="780" y2="340" stroke="#cbd5e1" stroke-width="2"/>
-                
-                <!-- A/B区分隔（B区更窄） -->
-                <line x1="480" y1="60" x2="480" y2="340" stroke="#cbd5e1" stroke-width="2"/>
-                <text x="250" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">A 区</text>
-                <text x="610" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">B 区</text>
-
-                <!-- 大厅 -->
-                <text x="400" y="470" text-anchor="middle" font-size="48" fill="#e2e8f0" font-weight="bold">大 厅</text>
-
-                <!-- 两个门 -->
-                <rect x="400" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
-                <text x="440" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
-                <rect x="480" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
-                <text x="520" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
-            </svg>
+            <div class="seat-map-wrap">
+                <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 整体外框 -->
+                    <rect x="20" y="20" width="760" height="560" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- 顶部窗户 -->
+                    <rect x="20" y="20" width="760" height="40" fill="#e0f2fe" stroke="#94a3b8" stroke-width="1"/>
+                    <text x="400" y="46" text-anchor="middle" font-size="18" fill="#0369a1">窗户</text>
+                    <!-- 自习区与大厅分隔 -->
+                    <line x1="20" y1="340" x2="780" y2="340" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- A/B区分隔 -->
+                    <line x1="480" y1="60" x2="480" y2="340" stroke="#cbd5e1" stroke-width="2"/>
+                    <text x="250" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">A 区</text>
+                    <text x="610" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">B 区</text>
+                    <!-- 大厅 -->
+                    <text x="400" y="470" text-anchor="middle" font-size="48" fill="#e2e8f0" font-weight="bold">大 厅</text>
+                    <!-- 两个门 -->
+                    <rect x="400" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                    <text x="440" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
+                    <rect x="480" y="340" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                    <text x="520" y="355" text-anchor="middle" font-size="14" fill="#475569">门</text>
+                </svg>
             </div>
 
             <div class="seat-legend">
@@ -297,12 +341,25 @@
         </div>
     </div>
 
-    <!-- 右键菜单 -->
+    <!-- PC端右键菜单 -->
     <div class="status-menu" id="statusMenu">
         <div class="item" onclick="setSeatStatus('available')">设为可选</div>
         <div class="item" onclick="setSeatStatus('maintenance')">设为维护中</div>
         <div class="divider"></div>
         <div class="item" onclick="openOccupyForm()">设置占用（录入客户信息）</div>
+    </div>
+
+    <!-- 移动端底部抽屉 -->
+    <div class="drawer-mask" id="drawerMask">
+        <div class="drawer-box">
+            <div class="drawer-handle"></div>
+            <div class="drawer-info" id="drawerInfo"></div>
+            <div class="drawer-btn-group">
+                <button class="drawer-btn btn-opt1" onclick="setSeatStatus('available');closeDrawer()">设为可选</button>
+                <button class="drawer-btn btn-opt2" onclick="setSeatStatus('maintenance');closeDrawer()">设为维护</button>
+                <button class="drawer-btn btn-opt3" onclick="closeDrawer();openOccupyForm()">设置占用（录入客户）</button>
+            </div>
+        </div>
     </div>
 
     <!-- 占用信息弹窗 -->
@@ -322,17 +379,21 @@
         </div>
     </div>
 
-    <!-- 悬浮提示框 -->
-    <div class="seat-tooltip" id="seatTip"></div>
-
     <div class="toast" id="toast"></div>
 
     <script>
         let currentSeatNo = "";
+        let currentSeatData = null;
         let adminPassword = "";
-        const tipEl = document.getElementById("seatTip");
-        let moveTimer = null;
-        let hideTimer = null;
+        const drawerMask = document.getElementById("drawerMask");
+
+        // 点击遮罩关闭抽屉
+        drawerMask.addEventListener("click",(e)=>{
+            if(e.target === drawerMask) closeDrawer();
+        })
+        function closeDrawer(){
+            drawerMask.classList.remove("show");
+        }
 
         function showToast(text) {
             const toast = document.getElementById("toast");
@@ -369,10 +430,6 @@
                 const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 g.setAttribute("class", "seat-group");
                 g.setAttribute("data-seat", seat.seat_no);
-                g.setAttribute("data-status", seat.status);
-                g.setAttribute("data-customer", seat.customer_id || "");
-                g.setAttribute("data-start", seat.occupy_start ? new Date(seat.occupy_start).toLocaleDateString() : "");
-                g.setAttribute("data-end", seat.occupy_end ? new Date(seat.occupy_end).toLocaleDateString() : "");
 
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("x", seat.pos_x);
@@ -394,59 +451,37 @@
                 text.textContent = seat.seat_no;
                 g.appendChild(text);
 
-                // 悬浮提示（防抖优化）
-                g.addEventListener("mousemove", e => {
-                    clearTimeout(moveTimer);
-                    clearTimeout(hideTimer);
-                    tipEl.classList.add("active");
-
-                    moveTimer = setTimeout(() => {
-                        const statusText = {
-                            available: "可选",
-                            occupied: "已占用",
-                            maintenance: "维护中"
-                        }[seat.status] || seat.status;
-
-                        let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
-                                    <div><span class="label">状态：</span>${statusText}</div>`;
-                        if (seat.status === "occupied" && seat.customer_id) {
-                            html += `<div><span class="label">客户编号：</span>${seat.customer_id}</div>
-                                     <div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
-                        }
-                        tipEl.innerHTML = html;
-
-                        // 边界检测
-                        let tipX = e.clientX + 12;
-                        let tipY = e.clientY + 12;
-                        const tipRect = tipEl.getBoundingClientRect();
-                        if (tipX + tipRect.width > window.innerWidth) {
-                            tipX = e.clientX - tipRect.width - 12;
-                        }
-                        if (tipY + tipRect.height > window.innerHeight) {
-                            tipY = e.clientY - tipRect.height - 12;
-                        }
-                        tipEl.style.left = tipX + "px";
-                        tipEl.style.top = tipY + "px";
-                    }, 16);
-                });
-
-                g.addEventListener("mouseleave", () => {
-                    clearTimeout(moveTimer);
-                    hideTimer = setTimeout(() => {
-                        tipEl.classList.remove("active");
-                    }, 120);
-                });
-
-                // 点击弹出操作菜单
+                // 点击座位 区分PC/移动端
                 g.addEventListener("click", e => {
                     e.stopPropagation();
                     currentSeatNo = seat.seat_no;
-                    const menu = document.getElementById("statusMenu");
-                    menu.style.left = e.clientX + "px";
-                    menu.style.top = e.clientY + "px";
-                    menu.classList.add("active");
-                });
+                    currentSeatData = seat;
+                    const statusText = {
+                        available: "可选",
+                        occupied: "已占用",
+                        maintenance: "维护中"
+                    }[seat.status] || seat.status;
 
+                    // 判断是否移动端
+                    const isMobile = window.innerWidth <= 640;
+                    if(isMobile){
+                        // 移动端：打开底部抽屉
+                        let infoHtml = `<div><strong>座位：${seat.seat_no}</strong></div>
+                        <div>状态：${statusText}</div>`;
+                        if(seat.status === "occupied" && seat.customer_id){
+                            infoHtml += `<div>客户编号：${seat.customer_id}</div>
+                            <div>占用时段：${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
+                        }
+                        document.getElementById("drawerInfo").innerHTML = infoHtml;
+                        drawerMask.classList.add("show");
+                    }else{
+                        // PC端：原有右键菜单
+                        const menu = document.getElementById("statusMenu");
+                        menu.style.left = e.clientX + "px";
+                        menu.style.top = e.clientY + "px";
+                        menu.classList.add("active");
+                    }
+                });
                 svg.appendChild(g);
             });
         }
