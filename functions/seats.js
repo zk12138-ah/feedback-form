@@ -7,14 +7,12 @@ export async function onRequest(context) {
     "Access-Control-Max-Age": "86400"
   };
 
-  // 处理跨域预检
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
     const url = new URL(request.url);
-    // 从url参数获取密码 ?password=xxx
     const inputPwd = url.searchParams.get("password");
     const realPwd = env.ADMIN_PASSWORD;
 
@@ -25,7 +23,6 @@ export async function onRequest(context) {
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
 
-    // 查询座位表
     const res = await fetch(`${SUPABASE_URL}/rest/v1/seat?select=*`, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -33,6 +30,11 @@ export async function onRequest(context) {
       }
     });
     const list = await res.json();
+
+    // ✅ 核心修复：强制判断list是否为数组
+    if (!Array.isArray(list)) {
+      throw new Error("数据库返回数据格式异常，请检查表名/连接");
+    }
 
     let available = 0;
     let occupied = 0;
