@@ -129,5 +129,41 @@
     © 2026 青云自习室 保留所有权利
     <p style="margin-top:6px;">网站原创内容著作权归本站所有；第三方服务、商标归属对应服务商。</p>
 </div>
+
+<script>
+// 一键复制手机号功能
+const phoneEl = document.querySelector(".copy-phone");
+const toast = document.createElement("div");
+toast.className = "toast-copy";
+toast.innerText = "号码已复制！";
+document.body.appendChild(toast);
+
+phoneEl.addEventListener("click", async ()=>{
+  const phone = phoneEl.dataset.tel;
+  try{
+    // 调用浏览器剪贴板API
+    await navigator.clipboard.writeText(phone);
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"),1800);
+  }catch(err){
+    // 兼容老旧浏览器兜底方案
+    const input = document.createElement("input");
+    input.value = phone;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    document.body.removeChild(input);
+    toast.classList.add("show");
+    setTimeout(()=>toast.classList.remove("show"),1800);
+  }
+})
+
+    
+
+    <script>
+
+
+
+    
 </body>
 </html>
