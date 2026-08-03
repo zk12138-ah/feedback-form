@@ -280,7 +280,7 @@
             let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
                         <div><span class="label">状态：</span>${statusText}</div>`;
             if (seat.status === "occupied" && seat.customer_id) {
-              html +=   <div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
+              html +=   `<div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
             }
             tipEl.innerHTML = html;
 
