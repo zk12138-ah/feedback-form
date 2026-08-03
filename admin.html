@@ -431,8 +431,8 @@
     }
 }
 
-        async function loadSeatData() {
-            const res = await fetch("/seats");
+            async function loadSeatData() {
+            const res = await fetch(`/seats?password=${encodeURIComponent(adminPassword)}`);
             const result = await res.json();
             if (!result.success) throw new Error(result.errMsg);
 
