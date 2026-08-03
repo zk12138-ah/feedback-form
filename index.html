@@ -16,21 +16,21 @@
             box-sizing: border-box;
             font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        body {
-            background-color: #ffffff;
-            background-image: url("logo-bg.png");
-            background-repeat: no-repeat;
-            background-position: top 90px center;
-            background-size: 320px auto;
-            min-height: 100vh;
-        }
+body {
+    background-color: #ffffff;
+    background-image: url("logo-bg.png");
+    background-repeat: no-repeat;
+    background-position: top 60px center;  /* 原来120 → 60，图片上移 */
+    background-size: 320px auto;
+    min-height: 100vh;
+}
 
-        /* 标题区域【最终定稿样式】 */
-        .header-logo-area {
-            text-align:center;
-            margin-top:320px;
-            padding:0 10px;
-        }
+.header-logo-area {
+    text-align:center;
+    margin-top:260px;   /* 原来320 → 260，标题文字整体上移 */
+    padding:0 10px;
+}
+        
         .main-title {
             font-size:56px;
             color:#1a3480;
@@ -139,40 +139,38 @@
         }
 
         /* ========== 移动端响应式规则 ========== */
-        @media (max-width: 640px) {
-            body {
-                background-size: 220px auto;
-                background-position: top 30px center;
-            }
-            .header-logo-area {
-                margin-top: 200px;
-            }
-            .main-title {
-                font-size: 36px;
-                letter-spacing:5px;
-            }
-            .en-title {
-                font-size:18px;
-            }
-            .tagline {
-                font-size:20px;
-                letter-spacing:4px;
-            }
-            /* 手机按钮改为3列 */
-            .func-row {
-                grid-template-columns: repeat(3,1fr);
-                gap:14px;
-            }
-            .circle-btn {
-                width:62px;
-                height:62px;
-                font-size:24px;
-            }
-            /* 卡片改成单列 */
-            .card-container {
-                grid-template-columns: 1fr;
-            }
-        }
+       @media (max-width: 640px) {
+    body {
+        background-size: 220px auto;
+        background-position: top 30px center; 
+    }
+    .header-logo-area {
+        margin-top: 140px;  /* 原来200px → 修改为140px，文字整体上移 */
+    }
+    .main-title {
+        font-size: 36px;
+        letter-spacing:5px;
+    }
+    .en-title {
+        font-size:18px;
+    }
+    .tagline {
+        font-size:20px;
+        letter-spacing:4px;
+    }
+    .func-row {
+        grid-template-columns: repeat(3,1fr);
+        gap:14px;
+    }
+    .circle-btn {
+        width:62px;
+        height:62px;
+        font-size:24px;
+    }
+    .card-container {
+        grid-template-columns: 1fr;
+    }
+}
 
         /* 社交账号卡片样式A */
 .social-card {
