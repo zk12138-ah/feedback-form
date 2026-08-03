@@ -22,9 +22,7 @@ export async function onRequest(context) {
     const baseUrl = env.SUPABASE_URL.replace(/\/+$/, "");
     const serviceKey = env.SUPABASE_SERVICE_KEY;
 
-    if (!baseUrl || !serviceKey) {
-      throw new Error("缺少Supabase环境变量");
-    }
+    if (!baseUrl || !serviceKey) throw new Error("缺少Supabase环境变量");
 
     const apiUrl = `${baseUrl}/rest/v1/seats?select=*&order=seat_no.asc`;
     const res = await fetch(apiUrl, {
@@ -42,20 +40,12 @@ export async function onRequest(context) {
     }
 
     const data = await res.json();
-
-    // 统计各状态数量
     const total = data.length;
     const available = data.filter(s => s.status === "available").length;
     const occupied = data.filter(s => s.status === "occupied").length;
 
     return Response.json(
-      {
-        success: true,
-        total,
-        available,
-        occupied,
-        list: data
-      },
+      { success: true, total, available, occupied, list: data },
       { headers: corsHeaders }
     );
 
