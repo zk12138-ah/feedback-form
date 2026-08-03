@@ -19,6 +19,20 @@ export async function onRequest(context) {
   }
 
   try {
+    // ========== 新增：管理员密码校验 ==========
+    const url = new URL(request.url);
+    const inputPwd = url.searchParams.get("password");
+    const realPwd = env.ADMIN_PASSWORD;
+    const isAdmin = inputPwd && inputPwd === realPwd;
+
+    // 传了密码但密码错误，直接返回权限失败
+    if (inputPwd && !isAdmin) {
+      return Response.json(
+        { success: false, errMsg: "权限验证失败" },
+        { headers: corsHeaders, status: 403 }
+      );
+    }
+
     const baseUrl = env.SUPABASE_URL.replace(/\/+$/, "");
     const serviceKey = env.SUPABASE_SERVICE_KEY;
 
@@ -44,10 +58,27 @@ export async function onRequest(context) {
     const available = data.filter(s => s.status === "available").length;
     const occupied = data.filter(s => s.status === "occupied").length;
 
-    return Response.json(
-      { success: true, total, available, occupied, list: data },
-      { headers: corsHeaders }
-    );
+    // ========== 双模式返回 ==========
+    if (isAdmin) {
+      // 管理员：返回完整全部数据
+      return Response.json(
+        { success: true, total, available, occupied, list: data },
+        { headers: corsHeaders }
+      );
+    } else {
+      // 公开用户：仅返回座位公开字段，脱敏敏感信息
+      const publicList = data.map(item => ({
+        seat_no: item.seat_no,
+        status: item.status,
+        pos_x: item.pos_x,
+        pos_y: item.pos_y,
+        area: item.area
+      }));
+      return Response.json(
+        { success: true, total, available, occupied, list: publicList },
+        { headers: corsHeaders }
+      );
+    }
 
   } catch (err) {
     console.error("获取座位状态失败:", err);
