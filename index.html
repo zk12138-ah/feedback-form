@@ -169,6 +169,58 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* 社交账号卡片样式A */
+.social-card {
+    background:#ffffff;
+    border-radius:16px;
+    padding:28px;
+    margin:30px 0 20px;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+    text-align:center;
+}
+.social-card h3{
+    color:#1a3480;
+    font-size:20px;
+    margin-bottom:10px;
+}
+.social-desc{
+    color:#555;
+    font-size:15px;
+    margin-bottom:22px;
+}
+.social-list{
+    display:flex;
+    gap:24px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+.social-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:16px;
+    color:#1a3480;
+    text-decoration:none;
+    padding:10px 16px;
+    border:1px solid #d6e1f5;
+    border-radius:12px;
+    transition: all 0.2s ease;
+}
+.social-item:hover{
+    background:#f0f6ff;
+    border-color:#1a3480;
+}
+.social-icon{
+    font-size:20px;
+}
+.copyright{
+    text-align:center;
+    color:#666;
+    font-size:14px;
+    padding:10px 0;
+}
+        
     </style>
 </head>
 <body>
@@ -231,6 +283,27 @@
             </div>
         </a>
     </div>
+
+    <!-- 社交账号板块 -->
+<div class="social-card">
+    <h3>关注青云自习室</h3>
+    <p class="social-desc">日常环境实拍、学习福利、活动通知持续更新</p>
+    <div class="social-list">
+        <a href="填入你的抖音主页链接" target="_blank" class="social-item">
+            <span class="social-icon">🎵</span>
+            <span>抖音：青云自习室</span>
+        </a>
+        <a href="填入你的小红书主页链接" target="_blank" class="social-item">
+            <span class="social-icon">📕</span>
+            <span>小红书：青云自习室</span>
+        </a>
+    </div>
+</div>
+
+<!-- 可选：底部版权信息，放在社交卡片下方 -->
+<div class="copyright">
+    © 2026 青云自习室 版权所有
+</div>
 
 </body>
 </html>
