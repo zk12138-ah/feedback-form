@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 720px;
+            max-width: 820px;
             margin: 0 auto;
             background: #fff;
             padding: 36px;
@@ -42,9 +42,7 @@
             margin-bottom: 16px;
             outline: none;
         }
-        .login-box input:focus {
-            border-color: #3678d3;
-        }
+        .login-box input:focus { border-color: #3678d3; }
         .btn {
             width: 100%;
             padding: 13px;
@@ -56,19 +54,12 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .btn:hover {
-            background: #1e5ab8;
-        }
-        .btn:disabled {
-            background: #80a8e0;
-            cursor: not-allowed;
-        }
-        .seat-panel {
-            display: none;
-        }
-        .seat-panel.active {
-            display: block;
-        }
+        .btn:hover { background: #1e5ab8; }
+        .btn:disabled { background: #80a8e0; cursor: not-allowed; }
+
+        .seat-panel { display: none; }
+        .seat-panel.active { display: block; }
+
         .seat-summary {
             display: flex;
             gap: 24px;
@@ -92,16 +83,11 @@
             height: auto;
             display: block;
         }
-        .seat {
-            cursor: pointer;
-            transition: transform 0.15s, opacity 0.2s;
-        }
-        .seat:hover {
-            transform: scale(1.08);
-        }
-        .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 1.5; }
-        .seat-occupied { fill: #ef4444; stroke: #dc2626; stroke-width: 1.5; }
-        .seat-maintenance { fill: #94a3b8; stroke: #64748b; stroke-width: 1.5; }
+        .seat { cursor: pointer; transition: transform 0.15s; }
+        .seat:hover { transform: scale(1.05); }
+        .seat-available { fill: #22c55e; stroke: #16a34a; stroke-width: 2; }
+        .seat-occupied { fill: #ef4444; stroke: #dc2626; stroke-width: 2; }
+        .seat-maintenance { fill: #94a3b8; stroke: #64748b; stroke-width: 2; }
 
         .seat-legend {
             display: flex;
@@ -131,7 +117,7 @@
             padding: 8px 0;
             z-index: 999;
             display: none;
-            min-width: 140px;
+            min-width: 160px;
         }
         .status-menu.active { display: block; }
         .status-menu .item {
@@ -139,9 +125,76 @@
             cursor: pointer;
             font-size: 14px;
         }
-        .status-menu .item:hover {
-            background: #f1f5f9;
+        .status-menu .item:hover { background: #f1f5f9; }
+        .status-menu .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 6px 0;
         }
+
+        /* 占用设置弹窗 */
+        .occupy-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .occupy-modal.active { display: flex; }
+        .modal-box {
+            background: #fff;
+            padding: 28px;
+            border-radius: 12px;
+            width: 360px;
+        }
+        .modal-box h4 {
+            color: #1a4b94;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        .modal-box label {
+            display: block;
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+        .modal-box input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0e0f5;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .modal-box input:focus { border-color: #3678d3; }
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .modal-btns .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .modal-btns .btn-confirm {
+            flex: 1;
+            padding: 10px;
+            background: #2b6bcd;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         .tip {
             text-align: center;
             color: #64748b;
@@ -160,7 +213,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
-            z-index: 1000;
+            z-index: 2000;
         }
         .toast.show { opacity: 1; }
     </style>
@@ -169,13 +222,11 @@
     <div class="container">
         <h2>自习室座位管理后台</h2>
 
-        <!-- 密码登录区 -->
         <div class="login-box" id="loginBox">
             <input type="password" id="adminPwd" placeholder="请输入管理员密码">
             <button class="btn" onclick="verifyAdmin()">进入管理</button>
         </div>
 
-        <!-- 座位管理区 -->
         <div class="seat-panel" id="seatPanel">
             <div class="seat-summary">
                 <div><strong id="totalSeat">0</strong>总座位</div>
@@ -184,12 +235,19 @@
             </div>
 
             <div class="seat-map-wrap">
-                <svg id="seatMap" viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="20" y="20" width="410" height="260" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-                    <rect x="200" y="20" width="50" height="260" fill="#f1f5f9"/>
-                    <text x="225" y="155" font-size="13" fill="#64748b" text-anchor="middle">过道</text>
-                    <text x="110" y="55" font-size="13" fill="#64748b" text-anchor="middle">A 区</text>
-                    <text x="340" y="55" font-size="13" fill="#64748b" text-anchor="middle">B 区</text>
+                <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="20" y="20" width="760" height="560" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                    <rect x="20" y="20" width="760" height="40" fill="#e0f2fe" stroke="#94a3b8" stroke-width="1"/>
+                    <text x="400" y="46" text-anchor="middle" font-size="18" fill="#0369a1">窗户</text>
+                    <line x1="20" y1="320" x2="780" y2="320" stroke="#cbd5e1" stroke-width="2"/>
+                    <line x1="480" y1="60" x2="480" y2="320" stroke="#cbd5e1" stroke-width="2"/>
+                    <text x="250" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">A 区</text>
+                    <text x="610" y="190" text-anchor="middle" font-size="40" fill="#cbd5e1" font-weight="bold">B 区</text>
+                    <text x="400" y="470" text-anchor="middle" font-size="48" fill="#e2e8f0" font-weight="bold">大 厅</text>
+                    <rect x="260" y="300" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                    <text x="300" y="315" text-anchor="middle" font-size="14" fill="#475569">门</text>
+                    <rect x="460" y="300" width="80" height="20" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+                    <text x="500" y="315" text-anchor="middle" font-size="14" fill="#475569">门</text>
                 </svg>
             </div>
 
@@ -198,16 +256,33 @@
                 <span><span class="dot occupied"></span> 已占用</span>
                 <span><span class="dot maintenance"></span> 维护中</span>
             </div>
-
-            <p class="tip">点击座位即可切换状态</p>
+            <p class="tip">点击座位选择操作</p>
         </div>
     </div>
 
-    <!-- 右键/点击弹出的状态菜单 -->
+    <!-- 右键菜单 -->
     <div class="status-menu" id="statusMenu">
-        <div class="item" onclick="changeSeatStatus('available')">设为可选</div>
-        <div class="item" onclick="changeSeatStatus('occupied')">设为已占用</div>
-        <div class="item" onclick="changeSeatStatus('maintenance')">设为维护中</div>
+        <div class="item" onclick="setSeatStatus('available')">设为可选</div>
+        <div class="item" onclick="setSeatStatus('maintenance')">设为维护中</div>
+        <div class="divider"></div>
+        <div class="item" onclick="openOccupyForm()">设置占用（录入客户信息）</div>
+    </div>
+
+    <!-- 占用信息弹窗 -->
+    <div class="occupy-modal" id="occupyModal">
+        <div class="modal-box">
+            <h4>设置座位占用</h4>
+            <label>客户编号</label>
+            <input type="text" id="customerId" placeholder="请输入客户编号">
+            <label>占用开始日期</label>
+            <input type="date" id="occupyStart">
+            <label>占用结束日期</label>
+            <input type="date" id="occupyEnd">
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeOccupyForm()">取消</button>
+                <button class="btn-confirm" onclick="submitOccupy()">确认设置</button>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -223,98 +298,139 @@
             setTimeout(() => toast.classList.remove("show"), 2000);
         }
 
-        // 验证管理员密码
         function verifyAdmin() {
             const pwd = document.getElementById("adminPwd").value.trim();
-            if (!pwd) {
-                showToast("请输入管理员密码");
-                return;
-            }
+            if (!pwd) { showToast("请输入管理员密码"); return; }
             adminPassword = pwd;
-            // 先拉一次座位数据验证权限
             loadSeatData().then(() => {
                 document.getElementById("loginBox").style.display = "none";
                 document.getElementById("seatPanel").classList.add("active");
                 showToast("登录成功");
-            }).catch(err => {
-                showToast(err.message || "密码错误");
-            });
+                // 20秒自动刷新
+                setInterval(loadSeatData, 20000);
+            }).catch(err => showToast(err.message || "密码错误"));
         }
 
-        // 加载座位数据
         async function loadSeatData() {
             const res = await fetch("/seats");
             const result = await res.json();
-            if (!result.success) throw new Error(result.errMsg || "加载失败");
+            if (!result.success) throw new Error(result.errMsg);
 
             document.getElementById("totalSeat").textContent = result.total;
             document.getElementById("availableSeat").textContent = result.available;
             document.getElementById("occupiedSeat").textContent = result.occupied;
 
             const svg = document.getElementById("seatMap");
-            // 清空旧座位
-            svg.querySelectorAll(".seat, .seat-text").forEach(el => el.remove());
+            svg.querySelectorAll(".seat-group").forEach(el => el.remove());
 
             result.list.forEach(seat => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "seat-group");
+
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                 rect.setAttribute("x", seat.pos_x);
                 rect.setAttribute("y", seat.pos_y);
-                rect.setAttribute("width", "36");
-                rect.setAttribute("height", "48");
+                rect.setAttribute("width", "50");
+                rect.setAttribute("height", "60");
                 rect.setAttribute("rx", "4");
                 rect.setAttribute("class", `seat seat-${seat.status}`);
-                rect.setAttribute("data-seat", seat.seat_no);
-                rect.addEventListener("click", e => openStatusMenu(e, seat.seat_no));
-                svg.appendChild(rect);
+                g.appendChild(rect);
 
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "seat-text");
-                text.setAttribute("x", seat.pos_x + 18);
-                text.setAttribute("y", seat.pos_y + 29);
+                text.setAttribute("x", seat.pos_x + 25);
+                text.setAttribute("y", seat.pos_y + 36);
                 text.setAttribute("text-anchor", "middle");
-                text.setAttribute("font-size", "11");
+                text.setAttribute("font-size", "14");
                 text.setAttribute("fill", "#ffffff");
                 text.setAttribute("pointer-events", "none");
-                text.textContent = seat.seat_no.split("-")[1];
-                svg.appendChild(text);
+                text.setAttribute("font-weight", "500");
+                text.textContent = seat.seat_no;
+                g.appendChild(text);
+
+                g.addEventListener("click", e => {
+                    e.stopPropagation();
+                    currentSeatNo = seat.seat_no;
+                    const menu = document.getElementById("statusMenu");
+                    menu.style.left = e.clientX + "px";
+                    menu.style.top = e.clientY + "px";
+                    menu.classList.add("active");
+                });
+
+                svg.appendChild(g);
             });
         }
 
-        // 打开状态选择菜单
-        function openStatusMenu(e, seatNo) {
-            e.stopPropagation();
-            currentSeatNo = seatNo;
-            const menu = document.getElementById("statusMenu");
-            menu.style.left = e.clientX + "px";
-            menu.style.top = e.clientY + "px";
-            menu.classList.add("active");
-        }
-
-        // 点击空白处关闭菜单
+        // 点击空白关闭菜单
         document.addEventListener("click", () => {
             document.getElementById("statusMenu").classList.remove("active");
         });
 
-        // 修改座位状态
-        async function changeSeatStatus(status) {
+        // 直接设置状态
+        async function setSeatStatus(status) {
             if (!currentSeatNo) return;
+            try {
+                const res = await fetch("/update-seat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ seat_no: currentSeatNo, status, password: adminPassword })
+                });
+                const result = await res.json();
+                if (!result.success) throw new Error(result.errMsg);
+                showToast("更新成功");
+                loadSeatData();
+            } catch (err) {
+                showToast(err.message || "更新失败");
+            }
+        }
+
+        // 打开占用表单
+        function openOccupyForm() {
+            document.getElementById("statusMenu").classList.remove("active");
+            document.getElementById("customerId").value = "";
+            document.getElementById("occupyStart").value = "";
+            document.getElementById("occupyEnd").value = "";
+            document.getElementById("occupyModal").classList.add("active");
+        }
+
+        function closeOccupyForm() {
+            document.getElementById("occupyModal").classList.remove("active");
+        }
+
+        // 提交占用设置
+        async function submitOccupy() {
+            const customerId = document.getElementById("customerId").value.trim();
+            const start = document.getElementById("occupyStart").value;
+            const end = document.getElementById("occupyEnd").value;
+
+            if (!customerId || !start || !end) {
+                showToast("请填写完整信息");
+                return;
+            }
+            if (new Date(end) < new Date(start)) {
+                showToast("结束日期不能早于开始日期");
+                return;
+            }
+
             try {
                 const res = await fetch("/update-seat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         seat_no: currentSeatNo,
-                        status,
+                        customer_id: customerId,
+                        occupy_start: new Date(start).toISOString(),
+                        occupy_end: new Date(end).toISOString(),
                         password: adminPassword
                     })
                 });
                 const result = await res.json();
                 if (!result.success) throw new Error(result.errMsg);
 
-                showToast("更新成功");
+                showToast("占用设置成功，座位已自动变为已占用");
+                closeOccupyForm();
                 loadSeatData();
             } catch (err) {
-                showToast(err.message || "更新失败");
+                showToast(err.message || "设置失败");
             }
         }
     </script>
