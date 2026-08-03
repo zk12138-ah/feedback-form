@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青云自习室 - 座位实时查询</title>
 <style>
   .seat-map-section {
     max-width: 820px;
@@ -144,6 +150,8 @@
     margin: 0;
   }
 </style>
+</head>
+<body>
 
 <div class="hot-service">
   <h3>热门服务</h3>
@@ -213,14 +221,13 @@
 <div class="seat-tooltip" id="seatTip"></div>
 
 <script>
-    async function loadSeatMap() {
+async function loadSeatMap() {
     const svg = document.getElementById("seatMap");
     const totalEl = document.getElementById("totalSeat");
     const availableEl = document.getElementById("availableSeat");
     const occupiedEl = document.getElementById("occupiedSeat");
     const tipEl = document.getElementById("seatTip");
 
-    // 节流变量 解决鬼畜
     let moveTimer = null;
     let hideTimer = null;
 
@@ -264,7 +271,6 @@
         text.textContent = seat.seat_no;
         g.appendChild(text);
 
-        // 鼠标移动 - 节流优化，解决鬼畜
         g.addEventListener("mousemove", e => {
           clearTimeout(moveTimer);
           clearTimeout(hideTimer);
@@ -279,12 +285,12 @@
 
             let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
                         <div><span class="label">状态：</span>${statusText}</div>`;
-            if (seat.status === "occupied" && seat.customer_id) {
-              html +=   `<div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
+            // 只判断时间，不再读取客户编号
+            if (seat.status === "occupied" && seat.occupy_start && seat.occupy_end) {
+              html += `<div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
             }
             tipEl.innerHTML = html;
 
-            // 边界判断，防止tooltip超出浏览器可视区域
             let tipX = e.clientX + 12;
             let tipY = e.clientY + 12;
             const tipRect = tipEl.getBoundingClientRect();
@@ -300,7 +306,6 @@
           }, 16);
         });
 
-        // 鼠标离开，延迟隐藏，消除边缘闪烁
         g.addEventListener("mouseleave", () => {
           clearTimeout(moveTimer);
           hideTimer = setTimeout(() => {
@@ -321,7 +326,7 @@
 
   loadSeatMap();
 
-  // 自动刷新
+  // 30秒自动刷新
   const refreshTimer = setInterval(loadSeatMap, 30000);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -331,3 +336,5 @@
     }
   });
 </script>
+</body>
+</html>
