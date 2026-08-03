@@ -1,57 +1,66 @@
-export async function onRequestPost(context) {
+export async function onRequest(context) {
   const { request, env } = context;
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST,OPTIONS",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400"
   };
 
+  // 处理跨域OPTIONS预检
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  try {
-    const body = await request.json();
-    const { seat_no, status, password, customer_id, occupy_start, occupy_end } = body;
-    const realPwd = env.ADMIN_PASSWORD;
+  // 只允许POST请求
+  if (request.method !== "POST") {
+    return Response.json(
+      { success: false, errMsg: "仅支持POST请求" },
+      { status: 405, headers: corsHeaders }
+    );
+  }
 
-    // 密码校验核心
-    if (!password || password !== realPwd) {
-      return Response.json({ success: false, errMsg: "权限验证失败" }, { status: 403, headers: corsHeaders });
+  try {
+    const { password, seat_no, status } = await request.json();
+    const adminPwd = env.ADMIN_PASSWORD;
+
+    // 管理员密码校验
+    if (password !== adminPwd) {
+      return Response.json(
+        { success: false, errMsg: "管理员密码错误" },
+        { status: 403, headers: corsHeaders }
+      );
     }
 
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
 
-    const updateData = { status };
-    // 如果传入客户信息，一并更新
-    if (customer_id) {
-      updateData.customer_id = customer_id;
-      updateData.occupy_start = occupy_start;
-      updateData.occupy_end = occupy_end;
-    } else {
-      // 设置为可选/维护时，清空客户信息
-      updateData.customer_id = null;
-      updateData.occupy_start = null;
-      updateData.occupy_end = null;
-    }
-
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/seat?seat_no=eq.${seat_no}`, {
+    // 更新seat表指定座位状态
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/seat?seat_no=eq.${encodeURIComponent(seat_no)}`, {
       method: "PATCH",
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         "Content-Type": "application/json",
-        Prefer: "return=minimal"
+        "Prefer": "return=representation"
       },
-      body: JSON.stringify(updateData)
+      body: JSON.stringify({ status })
     });
 
-    if (!resp.ok) throw new Error("数据库更新失败");
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(`Supabase更新失败: ${JSON.stringify(result)}`);
+    }
 
-    return Response.json({ success: true }, { headers: corsHeaders });
+    return Response.json(
+      { success: true, data: result },
+      { headers: corsHeaders }
+    );
+
   } catch (err) {
-    return Response.json({ success: false, errMsg: err.message }, { status: 500, headers: corsHeaders });
+    return Response.json(
+      { success: false, errMsg: err.message },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
