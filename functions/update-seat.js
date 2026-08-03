@@ -1,100 +1,57 @@
-export async function onRequest(context) {
+export async function onRequestPost(context) {
   const { request, env } = context;
-
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
+    "Access-Control-Allow-Methods": "POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
   };
 
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  if (request.method !== "POST") {
-    return Response.json(
-      { success: false, errMsg: "仅支持POST请求" },
-      { headers: corsHeaders, status: 405 }
-    );
-  }
-
   try {
     const body = await request.json();
     const { seat_no, status, password, customer_id, occupy_start, occupy_end } = body;
+    const realPwd = env.ADMIN_PASSWORD;
 
-    // 校验管理员密码
-    const adminPwd = env.ADMIN_PASSWORD;
-    if (!adminPwd || password !== adminPwd) {
-      return Response.json(
-        { success: false, errMsg: "管理员密码错误" },
-        { headers: corsHeaders, status: 403 }
-      );
+    // 密码校验核心
+    if (!password || password !== realPwd) {
+      return Response.json({ success: false, errMsg: "权限验证失败" }, { status: 403, headers: corsHeaders });
     }
 
-    if (!seat_no) {
-      return Response.json(
-        { success: false, errMsg: "缺少座位编号" },
-        { headers: corsHeaders, status: 400 }
-      );
-    }
+    const SUPABASE_URL = env.SUPABASE_URL;
+    const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
 
-    const baseUrl = env.SUPABASE_URL.replace(/\/+$/, "");
-    const serviceKey = env.SUPABASE_SERVICE_KEY;
-    const updateData = { updated_at: new Date().toISOString() };
-
-    // 模式1：直接设置状态
-    if (status) {
-      const allowed = ["available", "occupied", "maintenance"];
-      if (!allowed.includes(status)) {
-        return Response.json(
-          { success: false, errMsg: "状态值不合法" },
-          { headers: corsHeaders, status: 400 }
-        );
-      }
-      updateData.status = status;
-      // 设为可选时清空占用信息
-      if (status === "available") {
-        updateData.customer_id = null;
-        updateData.occupy_start = null;
-        updateData.occupy_end = null;
-      }
-    }
-
-    // 模式2：设置占用信息，自动变为已占用
-    if (customer_id && occupy_start && occupy_end) {
-      updateData.status = "occupied";
+    const updateData = { status };
+    // 如果传入客户信息，一并更新
+    if (customer_id) {
       updateData.customer_id = customer_id;
       updateData.occupy_start = occupy_start;
       updateData.occupy_end = occupy_end;
+    } else {
+      // 设置为可选/维护时，清空客户信息
+      updateData.customer_id = null;
+      updateData.occupy_start = null;
+      updateData.occupy_end = null;
     }
 
-    const apiUrl = `${baseUrl}/rest/v1/seats?seat_no=eq.${encodeURIComponent(seat_no)}`;
-    const res = await fetch(apiUrl, {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/seat?seat_no=eq.${seat_no}`, {
       method: "PATCH",
       headers: {
-        "apikey": serviceKey,
-        "Authorization": `Bearer ${serviceKey}`,
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         "Content-Type": "application/json",
-        "Prefer": "return=minimal"
+        Prefer: "return=minimal"
       },
       body: JSON.stringify(updateData)
     });
 
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(`Supabase更新失败：${JSON.stringify(errData)}`);
-    }
+    if (!resp.ok) throw new Error("数据库更新失败");
 
-    return Response.json(
-      { success: true, msg: "座位状态更新成功" },
-      { headers: corsHeaders }
-    );
-
+    return Response.json({ success: true }, { headers: corsHeaders });
   } catch (err) {
-    console.error("更新座位状态失败:", err);
-    return Response.json(
-      { success: false, errMsg: err.message || "服务器内部错误" },
-      { headers: corsHeaders, status: 500 }
-    );
+    return Response.json({ success: false, errMsg: err.message }, { status: 500, headers: corsHeaders });
   }
 }
