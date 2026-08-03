@@ -208,12 +208,16 @@
 <div class="seat-tooltip" id="seatTip"></div>
 
 <script>
-  async function loadSeatMap() {
+    async function loadSeatMap() {
     const svg = document.getElementById("seatMap");
     const totalEl = document.getElementById("totalSeat");
     const availableEl = document.getElementById("availableSeat");
     const occupiedEl = document.getElementById("occupiedSeat");
     const tipEl = document.getElementById("seatTip");
+
+    // 节流变量 解决鬼畜
+    let moveTimer = null;
+    let hideTimer = null;
 
     try {
       const res = await fetch("/seats");
@@ -224,7 +228,6 @@
       availableEl.textContent = result.available;
       occupiedEl.textContent = result.occupied;
 
-      // 清空旧座位
       svg.querySelectorAll(".seat-group").forEach(el => el.remove());
 
       result.list.forEach(seat => {
@@ -236,7 +239,6 @@
         g.setAttribute("data-start", seat.occupy_start ? new Date(seat.occupy_start).toLocaleDateString() : "");
         g.setAttribute("data-end", seat.occupy_end ? new Date(seat.occupy_end).toLocaleDateString() : "");
 
-        // 座位方块
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", seat.pos_x);
         rect.setAttribute("y", seat.pos_y);
@@ -246,7 +248,6 @@
         rect.setAttribute("class", `seat seat-${seat.status}`);
         g.appendChild(rect);
 
-        // 座位编号
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", seat.pos_x + 25);
         text.setAttribute("y", seat.pos_y + 36);
@@ -258,27 +259,49 @@
         text.textContent = seat.seat_no;
         g.appendChild(text);
 
-        // hover显示提示
+        // 鼠标移动 - 节流优化，解决鬼畜
         g.addEventListener("mousemove", e => {
-          const statusText = {
-            available: "可选",
-            occupied: "已占用",
-            maintenance: "维护中"
-          }[seat.status] || seat.status;
-
-          let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
-                      <div><span class="label">状态：</span>${statusText}</div>`;
-          if (seat.status === "occupied" && seat.customer_id) {
-            html += `<div><span class="label">客户编号：</span>${seat.customer_id}</div>
-                     <div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
-          }
-          tipEl.innerHTML = html;
-          tipEl.style.left = e.clientX + 12 + "px";
-          tipEl.style.top = e.clientY + 12 + "px";
+          clearTimeout(moveTimer);
+          clearTimeout(hideTimer);
           tipEl.classList.add("active");
+
+          moveTimer = setTimeout(() => {
+            const statusText = {
+              available: "可选",
+              occupied: "已占用",
+              maintenance: "维护中"
+            }[seat.status] || seat.status;
+
+            let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
+                        <div><span class="label">状态：</span>${statusText}</div>`;
+            if (seat.status === "occupied" && seat.customer_id) {
+              html += `<div><span class="label">客户编号：</span>${seat.customer_id}</div>
+                       <div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
+            }
+            tipEl.innerHTML = html;
+
+            // 边界判断，防止tooltip超出浏览器可视区域
+            let tipX = e.clientX + 12;
+            let tipY = e.clientY + 12;
+            const tipRect = tipEl.getBoundingClientRect();
+            if (tipX + tipRect.width > window.innerWidth) {
+              tipX = e.clientX - tipRect.width - 12;
+            }
+            if (tipY + tipRect.height > window.innerHeight) {
+              tipY = e.clientY - tipRect.height - 12;
+            }
+
+            tipEl.style.left = tipX + "px";
+            tipEl.style.top = tipY + "px";
+          }, 16);
         });
+
+        // 鼠标离开，延迟隐藏，消除边缘闪烁
         g.addEventListener("mouseleave", () => {
-          tipEl.classList.remove("active");
+          clearTimeout(moveTimer);
+          hideTimer = setTimeout(() => {
+            tipEl.classList.remove("active");
+          }, 120);
         });
 
         svg.appendChild(g);
@@ -294,14 +317,13 @@
 
   loadSeatMap();
 
-  // 每30秒自动刷新
+  // 自动刷新
   const refreshTimer = setInterval(loadSeatMap, 30000);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       clearInterval(refreshTimer);
     } else {
       loadSeatMap();
-      setInterval(loadSeatMap, 30000);
     }
   });
 </script>
