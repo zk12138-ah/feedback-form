@@ -30,6 +30,38 @@
     font-size: 22px;
     margin-bottom: 8px;
   }
+  /* ==========新增预约提示文字样式【和h3完全统一】========== */
+  .seat-notice{
+    text-align:center;
+    color:#1a4b94;
+    font-size:22px;
+    margin-top:16px;
+  }
+  .tel-link,.wx-copy{
+    color:#1a4b94;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .tel-link:active,.wx-copy:active{
+    opacity:0.65;
+  }
+  /* 复制成功弹窗 */
+  .copy-toast{
+    position:fixed;
+    top:45%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(0,0,0,0.72);
+    color:#fff;
+    padding:10px 24px;
+    border-radius:8px;
+    z-index:9999;
+    display:none;
+  }
+  .copy-toast.show{
+    display:block;
+  }
+
   .seat-summary {
     display: flex;
     gap: 24px;
@@ -192,6 +224,9 @@
     <div><strong id="availableSeat">0</strong>剩余可选</div>
     <div><strong id="occupiedSeat">0</strong>已占用</div>
   </div>
+
+  <!-- 预约联系文字（样式和上方标题保持一致） -->
+  <p class="seat-notice">如需预约请联系管理员（电话：<a href="tel:15912382652" class="tel-link">15912382652</a>/微信：<span class="wx-copy" data-wx="jc_qingyun">jc_qingyun</span>）</p>
 
   <div class="seat-map-wrap">
    <svg id="seatMap" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
@@ -363,6 +398,35 @@ tipEl.style.top = tipY + "px";
       loadSeatMap();
     }
   });
+</script>
+
+<!-- 微信号复制功能JS -->
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+    const wxEl = document.querySelector('.wx-copy');
+    // 创建弹窗
+    const toast = document.createElement('div');
+    toast.className = "copy-toast";
+    toast.innerText = "微信号已复制！前往微信粘贴";
+    document.body.appendChild(toast);
+
+    wxEl.addEventListener('click',async ()=>{
+        const wxNum = wxEl.dataset.wx;
+        try{
+            await navigator.clipboard.writeText(wxNum);
+        }catch{
+            // 兼容老旧浏览器
+            const tempInput = document.createElement("input");
+            tempInput.value = wxNum;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+        }
+        toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'),1800);
+    })
+})
 </script>
 
     <div style="clear:both; text-align:center; padding:30px 20px 50px; color:#546478; font-size:17px; letter-spacing:1.5px; font-weight:300;">
