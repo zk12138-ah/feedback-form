@@ -1,65 +1,59 @@
 export async function onRequest(context) {
   const { request, env } = context;
+
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400"
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
   };
 
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
+  if (request.method !== "GET") {
+    return Response.json(
+      { success: false, errMsg: "仅支持GET请求" },
+      { headers: corsHeaders, status: 405 }
+    );
+  }
+
   try {
-    const url = new URL(request.url);
-    const inputPwd = url.searchParams.get("password");
-    const realPwd = env.ADMIN_PASSWORD;
+    const baseUrl = env.SUPABASE_URL.replace(/\/+$/, "");
+    const serviceKey = env.SUPABASE_SERVICE_KEY;
 
-    if (!inputPwd || inputPwd !== realPwd) {
-      return Response.json(
-        { success: false, errMsg: "权限验证失败" },
-        { status: 403, headers: corsHeaders }
-      );
-    }
+    if (!baseUrl || !serviceKey) throw new Error("缺少Supabase环境变量");
 
-    const SUPABASE_URL = env.SUPABASE_URL;
-    const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY;
-    console.log("SUPABASE_URL是否加载:", !!SUPABASE_URL);
-    console.log("SUPABASE_ANON_KEY是否加载:", !!SUPABASE_ANON_KEY);
-
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/seats?select=*`, {
+    const apiUrl = `${baseUrl}/rest/v1/seats?select=*&order=seat_no.asc`;
+    const res = await fetch(apiUrl, {
+      method: "GET",
       headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`,
+        "Content-Type": "application/json"
       }
     });
-    const rawData = await res.json();
-    console.log("Supabase原始返回数据：", rawData);
 
-    if (!Array.isArray(rawData)) {
-      throw new Error(`数据库返回非数组，原始返回内容：${JSON.stringify(rawData)}`);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(`Supabase查询失败：${JSON.stringify(errData)}`);
     }
 
-    let available = 0;
-    let occupied = 0;
-    rawData.forEach(item => {
-      if (item.status === "available") available++;
-      if (item.status === "occupied") occupied++;
-    });
+    const data = await res.json();
+    const total = data.length;
+    const available = data.filter(s => s.status === "available").length;
+    const occupied = data.filter(s => s.status === "occupied").length;
 
-    return Response.json({
-      success: true,
-      total: rawData.length,
-      available,
-      occupied,
-      list: rawData
-    }, { headers: corsHeaders });
+    return Response.json(
+      { success: true, total, available, occupied, list: data },
+      { headers: corsHeaders }
+    );
 
   } catch (err) {
+    console.error("获取座位状态失败:", err);
     return Response.json(
-      { success: false, errMsg: err.message },
-      { status: 500, headers: corsHeaders }
+      { success: false, errMsg: err.message || "服务器内部错误" },
+      { headers: corsHeaders, status: 500 }
     );
   }
 }
