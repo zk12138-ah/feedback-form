@@ -70,7 +70,7 @@
   .dot.occupied { background: #ef4444; }
   .dot.maintenance { background: #94a3b8; }
 
-  .seat-tooltip {
+ .seat-tooltip {
     position: fixed;
     background: rgba(15, 23, 42, 0.92);
     color: #fff;
@@ -80,10 +80,15 @@
     line-height: 1.6;
     pointer-events: none;
     z-index: 999;
-    display: none;
+    /* 增加淡入淡出 */
+    opacity: 0;
+    transition: opacity 0.18s ease;
     white-space: nowrap;
-  }
-  .seat-tooltip.active { display: block; }
+                }
+  .seat-tooltip.active {
+    display: block;
+    opacity: 1;
+                      }
   .seat-tooltip .label { color: #94a3b8; margin-right: 6px; }
 </style>
 
