@@ -249,69 +249,94 @@
 
 <script>
 let refreshTimer = null;
+// 保存上一次座位数据，用于增量对比
+let prevSeatMap = new Map();
 
 async function loadSeatMap() {
     const svg = document.getElementById("seatMap");
     const totalEl = document.getElementById("totalSeat");
     const availableEl = document.getElementById("availableSeat");
     const occupiedEl = document.getElementById("occupiedSeat");
-    const tipEl = document.getElementById("seatTip");
 
     try {
-      const res = await fetch("/seats");
-      const result = await res.json();
-      if (!result.success) throw new Error(result.errMsg);
+        const res = await fetch("/seats");
+        const result = await res.json();
+        if (!result.success) throw new Error(result.errMsg);
 
-      totalEl.textContent = result.total;
-      availableEl.textContent = result.available;
-      occupiedEl.textContent = result.occupied;
+        totalEl.textContent = result.total;
+        availableEl.textContent = result.available;
+        occupiedEl.textContent = result.occupied;
 
-      svg.querySelectorAll(".seat-group").forEach(el => el.remove());
-      // DocumentFragment：内存中批量创建DOM，只一次性插入真实DOM
-      const frag = document.createDocumentFragment();
+        const incomingList = result.list;
+        const incomingMap = new Map();
+        incomingList.forEach(s => incomingMap.set(s.seat_no, s));
 
-      result.list.forEach(seat => {
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", "seat-group");
-        g.setAttribute("data-seat", seat.seat_no);
-        g.setAttribute("data-status", seat.status);
-        // 将座位原始数据挂载到DOM，事件委托读取
-        g.dataset.seatData = JSON.stringify(seat);
+        // 判断是否首次渲染页面
+        const isFirstRender = prevSeatMap.size === 0;
 
-        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        rect.setAttribute("x", seat.pos_x);
-        rect.setAttribute("y", seat.pos_y);
-        rect.setAttribute("width", "50");
-        rect.setAttribute("height", "60");
-        rect.setAttribute("rx", "4");
-        rect.setAttribute("class", `seat seat-${seat.status}`);
-        g.appendChild(rect);
+        if(isFirstRender){
+            // 首次：全量创建所有座位
+            svg.querySelectorAll(".seat-group").forEach(el => el.remove());
+            const frag = document.createDocumentFragment();
+            incomingList.forEach(seat => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "seat-group");
+                g.setAttribute("data-seat", seat.seat_no);
+                g.setAttribute("data-status", seat.status);
+                g.dataset.seatData = JSON.stringify(seat);
 
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", seat.pos_x + 25);
-        text.setAttribute("y", seat.pos_y + 36);
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("font-size", "14");
-        text.setAttribute("fill", "#ffffff");
-        text.setAttribute("pointer-events", "none");
-        text.setAttribute("font-weight", "50");
-        text.textContent = seat.seat_no;
-        g.appendChild(text);
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", seat.pos_x);
+                rect.setAttribute("y", seat.pos_y);
+                rect.setAttribute("width", "50");
+                rect.setAttribute("height", "60");
+                rect.setAttribute("rx", "4");
+                rect.setAttribute("class", `seat seat-${seat.status}`);
+                g.appendChild(rect);
 
-        frag.appendChild(g);
-      });
-      // 全部节点生成完成后一次性挂载，仅一次重排
-      svg.appendChild(frag);
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", seat.pos_x + 25);
+                text.setAttribute("y", seat.pos_y + 36);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", "14");
+                text.setAttribute("fill", "#ffffff");
+                text.setAttribute("pointer-events", "none");
+                text.setAttribute("font-weight", "50");
+                text.textContent = seat.seat_no;
+                g.appendChild(text);
+                frag.appendChild(g);
+            });
+            svg.appendChild(frag);
+        }else{
+            // ========= 增量更新：只修改状态变化的座位 =========
+            for(const seat of incomingList){
+                const oldSeat = prevSeatMap.get(seat.seat_no);
+                // 状态没变，跳过，不操作DOM
+                if(oldSeat && oldSeat.status === seat.status) continue;
+
+                // 找到页面上已存在的座位g元素
+                const gDom = svg.querySelector(`.seat-group[data-seat="${seat.seat_no}"]`);
+                if(gDom){
+                    // 更新状态class
+                    const rectDom = gDom.querySelector(".seat");
+                    rectDom.className.baseVal = `seat seat-${seat.status}`;
+                    gDom.setAttribute("data-status", seat.status);
+                    gDom.dataset.seatData = JSON.stringify(seat);
+                }
+            }
+        }
+        // 更新内存缓存为当前最新座位数据
+        prevSeatMap = incomingMap;
 
     } catch (err) {
-      console.error("座位图加载失败:", err);
-      totalEl.textContent = "-";
-      availableEl.textContent = "-";
-      occupiedEl.textContent = "-";
+        console.error("座位图加载失败:", err);
+        totalEl.textContent = "-";
+        availableEl.textContent = "-";
+        occupiedEl.textContent = "-";
     }
 }
 
-// 事件委托：只给svg根节点绑定鼠标事件，而不是每个座位
+// 事件委托：只给svg根节点绑定鼠标事件
 (function setupSvgDelegate(){
     const svg = document.getElementById("seatMap");
     const tipEl = document.getElementById("seatTip");
@@ -361,7 +386,7 @@ async function loadSeatMap() {
             }
             tipEl.style.left = tipX + "px";
             tipEl.style.top = tipY + "px";
-        },16);
+        },24); // 适度加大防抖，降低mousemove执行频率
     })
 
     svg.addEventListener("mouseleave",()=>{
@@ -372,15 +397,12 @@ async function loadSeatMap() {
     })
 })();
 
-// DOM解析完成，浏览器空闲后才执行第一次座位加载
 document.addEventListener("DOMContentLoaded", ()=>{
     requestIdleCallback(()=>{
         loadSeatMap();
-        // 启动轮询
         refreshTimer = setInterval(loadSeatMap, 30000);
     })
 
-    // 页面可见性控制
     document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
             clearInterval(refreshTimer);
