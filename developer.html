@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>开发人员 | 青云自习室</title>
@@ -12,26 +9,62 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         body {
-            background-color: #f8fafe;
+            background-color: #000000;
             padding: 30px 20px;
+            overflow-x:hidden;
         }
+        .matrix-left,
+        .matrix-right {
+            position: fixed;
+            top:0;
+            bottom:0;
+            z-index: -1;
+            pointer-events: none;
+            background-color:#000000;
+        }
+        .matrix-left{
+            left:0;
+        }
+        .matrix-right{
+            right:0;
+        }
+        @media (min-width: 640px) {
+            .matrix-left,
+            .matrix-right {
+                width: calc( (100vw - 600px) / 2 );
+            }
+        }
+        @media (max-width: 639px) {
+            .matrix-left,
+            .matrix-right {
+                width: 20px;
+            }
+            body {
+                padding-left: 30px;
+                padding-right: 30px;
+                padding-top:20px;
+                padding-bottom:20px;
+            }
+        }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
         }
         .back-btn {
             display: inline-block;
             text-decoration: none;
             color:#1a3480;
             font-size:16px;
-            margin-bottom:24px;
+            margin:0 0 20px 0;
         }
         .title-box {
             text-align:center;
-            margin-bottom:24px;
+            margin-bottom:0px;
         }
         .title-box h1{
             color:#1a3480;
@@ -55,16 +88,29 @@
             color:#333;
             margin-bottom:10px;
         }
+        .copyright {
+            text-align:center;
+            color:#666;
+            font-size:13px;
+            padding-top:20px;
+            margin-top:20px;
+            border-top:1px solid #eee;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="./index.html" class="back-btn">← 返回首页</a>
-        <div class="title-box">
-            <h1>开发人员信息</h1>
-        </div>
+    <canvas class="matrix-left"></canvas>
+    <canvas class="matrix-right"></canvas>
 
+    <div class="container">
+        <!-- 唯一一张卡片：所有东西全部写在这里面，外面没有任何白色盒子 -->
         <div class="content-card">
+            <a href="./index.html" class="back-btn">← 返回首页</a>
+
+            <div class="title-box">
+                <h1>开发人员信息</h1>
+            </div>
+
             <h3>👤 项目开发者</h3>
             <p>【ak12138 & doubao ai】</p>
 
@@ -79,19 +125,74 @@
 
             <h3>📄 项目说明</h3>
             <p>本系统为课程实践作品，用于自习室收集访客意见，持续优化学习环境。该网站现处于试运营阶段，若出现技术问题请联系开发人员（qq：2263305233）</p>
+
+            <div style="clear:both; text-align:center; padding:110px 0 110px; color:#546478; font-size:17px; letter-spacing:1.5px; font-weight:300;">
+                伏案追逐理想，亦值得一方舒适天地
+            </div>
+
+            <!-- 版权直接放进卡片内部，增加分割线，不再独立在外 -->
+            <div class="copyright">
+                © 2026 青云自习室 保留所有权利
+                <p style="margin-top:10px;">网站原创内容著作权归本站所有；第三方服务、商标产权归属对应服务商。</p>
+            </div>
         </div>
-
-         <div style="clear:both; text-align:center; padding:30px 20px 50px; color:#546478; font-size:17px; letter-spacing:1.5px; font-weight:300;">
-         伏案追逐理想，亦值得一方舒适天地
-         </div>
-        
+        <!-- content‑card结束，外面不再有任何div -->
     </div>
-    <div class="copyright" style="text-align:center;color:#666;font-size:13px;padding:20px 10px;">
-    © 2026 青云自习室 保留所有权利
-    <p style="margin-top:6px;">网站原创内容著作权归本站所有；第三方服务、商标产权归属对应服务商。</p>
-</div>
 
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a279a41b4a2a46d099977b471c986068"}'></script><!-- End Cloudflare Web Analytics -->
-    
+<!-- Cloudflare Web Analytics -->
+<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a279a41b4a2a46d099977b471c986068"}'></script>
+<!-- End Cloudflare Web Analytics -->
+
+<script>
+// C语言风格代码雨
+function initMatrix(canvas){
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    const fontSize = 14;        // 字体大小 → 越小列越多（数量变多），越大列越少
+    const speed = 0.8;            // 下落速度：1正常，2更快，0.5更慢
+    const resetProb = 0.90;    // 重置概率：数值越大，雨越稀疏；越小越密集。
+    let columns;
+    let drops;
+
+    function resize(){
+        w = canvas.offsetWidth;
+        h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+        columns = Math.floor(w / fontSize);
+        drops = Array(columns).fill(0);
+    }
+    resize();
+    window.addEventListener('resize',resize);
+
+    const chars = '0123456789{}[]()<>;=+-*/&|!#intcharfloatdoubleshortlongifelseforwhileswitchbreakreturnvoidtypedef#include';
+
+    function draw(){
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(0,0,w,h);
+        ctx.fillStyle = '#00aa44';
+        ctx.font = fontSize + 'px monospace';
+        for(let i=0;i<drops.length;i++){
+            const text = chars[Math.floor(Math.random()*chars.length)];
+            ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+            if(drops[i]*fontSize > h && Math.random()>0.995){
+                drops[i]=0;
+            }
+            drops[i]++;
+        }
+    }
+    function loop(){
+        draw();
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+const canvasLeft = document.querySelector('.matrix-left');
+const canvasRight = document.querySelector('.matrix-right');
+initMatrix(canvasLeft);
+initMatrix(canvasRight);
+</script>
+
 </body>
 </html>
