@@ -248,15 +248,14 @@
 <div class="seat-tooltip" id="seatTip"></div>
 
 <script>
+let refreshTimer = null;
+
 async function loadSeatMap() {
     const svg = document.getElementById("seatMap");
     const totalEl = document.getElementById("totalSeat");
     const availableEl = document.getElementById("availableSeat");
     const occupiedEl = document.getElementById("occupiedSeat");
     const tipEl = document.getElementById("seatTip");
-
-    let moveTimer = null;
-    let hideTimer = null;
 
     try {
       const res = await fetch("/seats");
@@ -268,12 +267,16 @@ async function loadSeatMap() {
       occupiedEl.textContent = result.occupied;
 
       svg.querySelectorAll(".seat-group").forEach(el => el.remove());
+      // DocumentFragment：内存中批量创建DOM，只一次性插入真实DOM
+      const frag = document.createDocumentFragment();
 
       result.list.forEach(seat => {
         const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
         g.setAttribute("class", "seat-group");
         g.setAttribute("data-seat", seat.seat_no);
         g.setAttribute("data-status", seat.status);
+        // 将座位原始数据挂载到DOM，事件委托读取
+        g.dataset.seatData = JSON.stringify(seat);
 
         const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         rect.setAttribute("x", seat.pos_x);
@@ -295,12 +298,37 @@ async function loadSeatMap() {
         text.textContent = seat.seat_no;
         g.appendChild(text);
 
-        g.addEventListener("mousemove", e => {
-          clearTimeout(moveTimer);
-          clearTimeout(hideTimer);
-          tipEl.classList.add("active");
+        frag.appendChild(g);
+      });
+      // 全部节点生成完成后一次性挂载，仅一次重排
+      svg.appendChild(frag);
 
-          moveTimer = setTimeout(() => {
+    } catch (err) {
+      console.error("座位图加载失败:", err);
+      totalEl.textContent = "-";
+      availableEl.textContent = "-";
+      occupiedEl.textContent = "-";
+    }
+}
+
+// 事件委托：只给svg根节点绑定鼠标事件，而不是每个座位
+(function setupSvgDelegate(){
+    const svg = document.getElementById("seatMap");
+    const tipEl = document.getElementById("seatTip");
+    let moveTimer = null;
+    let hideTimer = null;
+
+    svg.addEventListener("mousemove", (e)=>{
+        const targetG = e.target.closest(".seat-group");
+        clearTimeout(moveTimer);
+        clearTimeout(hideTimer);
+        if(!targetG){
+            tipEl.classList.remove("active");
+            return;
+        }
+        tipEl.classList.add("active");
+        moveTimer = setTimeout(()=>{
+            const seat = JSON.parse(targetG.dataset.seatData);
             const statusText = {
               available: "可选",
               occupied: "已占用",
@@ -309,8 +337,6 @@ async function loadSeatMap() {
 
             let html = `<div><span class="label">座位：</span>${seat.seat_no}</div>
                         <div><span class="label">状态：</span>${statusText}</div>`;
-            
-            // 已占用座位显示占用时段
             if (seat.status === "occupied" && seat.occupy_start && seat.occupy_end) {
               html += `<div><span class="label">占用时段：</span>${new Date(seat.occupy_start).toLocaleDateString()} ~ ${new Date(seat.occupy_end).toLocaleDateString()}</div>`;
             }
@@ -321,56 +347,50 @@ async function loadSeatMap() {
             let tipX = e.clientX + offsetX;
             let tipY = e.clientY + offsetY;
 
-            // 临时渲染获取弹窗尺寸
             tipEl.style.left = "-9999px";
             tipEl.style.top = "-9999px";
             const tipRect = tipEl.getBoundingClientRect();
 
-            // 横向边界判断
             if (tipX + tipRect.width > window.innerWidth) {
                 tipX = e.clientX - tipRect.width - offsetX;
             }
-
-            // 纵向智能判断
             if (e.clientY > window.innerHeight / 2) {
                 tipY = e.clientY - tipRect.height - offsetY;
             } else {
                 tipY = e.clientY + offsetY;
             }
-
             tipEl.style.left = tipX + "px";
             tipEl.style.top = tipY + "px";
-          }, 16);
-        });
+        },16);
+    })
 
-        g.addEventListener("mouseleave", () => {
-          clearTimeout(moveTimer);
-          hideTimer = setTimeout(() => {
+    svg.addEventListener("mouseleave",()=>{
+        clearTimeout(moveTimer);
+        hideTimer = setTimeout(()=>{
             tipEl.classList.remove("active");
-          }, 120);
-        });
+        },120)
+    })
+})();
 
-        svg.appendChild(g);
-      });
+// DOM解析完成，浏览器空闲后才执行第一次座位加载
+document.addEventListener("DOMContentLoaded", ()=>{
+    requestIdleCallback(()=>{
+        loadSeatMap();
+        // 启动轮询
+        refreshTimer = setInterval(loadSeatMap, 30000);
+    })
 
-    } catch (err) {
-      console.error("座位图加载失败:", err);
-      totalEl.textContent = "-";
-      availableEl.textContent = "-";
-      occupiedEl.textContent = "-";
-    }
-  }
+    // 页面可见性控制
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            clearInterval(refreshTimer);
+        } else {
+            refreshTimer = setInterval(loadSeatMap, 30000);
+            loadSeatMap();
+        }
+    });
+})
 
-  loadSeatMap();
-
-  const refreshTimer = setInterval(loadSeatMap, 30000);
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      clearInterval(refreshTimer);
-    } else {
-      loadSeatMap();
-    }
-  });
 </script>
 
 <script>
@@ -408,7 +428,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     <p style="margin-top:6px;">网站原创内容著作权归本站所有；第三方服务、商标归属对应服务商。</p>
 </div>
 
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a279a41b4a2a46d099977b471c986068"}'></script><!-- End Cloudflare Web Analytics -->
+<!-- Cloudflare Web Analytics 使用defer延迟，不阻塞主线程 -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a279a41b4a2a46d099977b471c986068"}'></script>
   
 </body>
 </html>
