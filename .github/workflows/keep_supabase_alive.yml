@@ -20,4 +20,4 @@ jobs:
           curl -s -o /dev/null -w "请求状态码：%{http_code}" \
             -H "apikey: ${DB_ANON_KEY}" \
             -H "Authorization: Bearer ${DB_ANON_KEY}" \
-            "${DB_URL}/rest/v1/seat?select=id&limit=1"
+            "${DB_URL}/rest/v1/seats?select=id&limit=1"
