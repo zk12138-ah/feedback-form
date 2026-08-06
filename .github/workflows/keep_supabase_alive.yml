@@ -1,0 +1,23 @@
+name: Supabase数据库定时保活
+# 触发规则
+on:
+  # cron UTC时区：0 0 */5 * * → 每5天凌晨0点执行（北京时间+8）
+  schedule:
+    - cron: '0 0 */5 * *'
+  # 支持手动一键测试
+  workflow_dispatch:
+
+jobs:
+  ping_database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 发起座位表查询，保活数据库
+        env:
+          DB_URL: ${{ secrets.SUPABASE_URL }}
+          DB_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          # 请求座位表，读取1条数据，产生有效数据库访问
+          curl -s -o /dev/null -w "请求状态码：%{http_code}" \
+            -H "apikey: ${DB_ANON_KEY}" \
+            -H "Authorization: Bearer ${DB_ANON_KEY}" \
+            "${DB_URL}/rest/v1/seat?select=id&limit=1"
